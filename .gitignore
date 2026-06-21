@@ -1,0 +1,12 @@
+# dependencias
+node_modules/
+# build
+dist/
+.vercel/
+.astro/
+# entorno (NUNCA subir claves)
+.env
+.env.production
+# sistema
+.DS_Store
+*.log

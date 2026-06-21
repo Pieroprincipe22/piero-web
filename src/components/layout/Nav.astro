@@ -1,0 +1,29 @@
+---
+import { site } from '../../data/site';
+import { navigation } from '../../data/navigation';
+---
+
+<header class="nav" id="nav">
+  <div class="wrap nav__inner">
+    <a href="#" class="logo"><span class="logo__mark"><span>{site.mark}</span></span>{site.brand}</a>
+    <nav class="nav__links" id="menu">
+      {navigation.map((item) => <a href={item.href}>{item.label}</a>)}
+    </nav>
+    <div class="nav__cta">
+      <a href="#contacto" class="btn btn--primary">Pide presupuesto</a>
+      <button class="nav__toggle" id="toggle" aria-label="Abrir menú">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<script>
+  const nav = document.getElementById('nav');
+  addEventListener('scroll', () => nav?.classList.toggle('scrolled', window.scrollY > 12));
+
+  const toggle = document.getElementById('toggle');
+  const menu = document.getElementById('menu');
+  toggle?.addEventListener('click', () => menu?.classList.toggle('open'));
+  menu?.querySelectorAll('a').forEach((a) => a.addEventListener('click', () => menu?.classList.remove('open')));
+</script>

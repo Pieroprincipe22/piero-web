@@ -1,0 +1,24 @@
+---
+import { proceso } from '../../data/proceso';
+---
+
+<section class="section proceso" id="proceso">
+  <div class="wrap">
+    <div class="section__head reveal">
+      <span class="eyebrow">Cómo trabajo</span>
+      <h2>Un proceso simple, de principio a fin</h2>
+      <p>Sin tecnicismos ni sustos. Tú me cuentas qué necesitas y yo me encargo del resto.</p>
+    </div>
+    <div class="steps">
+      {
+        proceso.map((p) => (
+          <div class="step reveal">
+            <span class="step__n">{p.n}</span>
+            <h3>{p.titulo}</h3>
+            <p>{p.texto}</p>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</section>

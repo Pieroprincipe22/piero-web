@@ -1,0 +1,42 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Nav from '../components/layout/Nav.astro';
+import Hero from '../components/sections/Hero.astro';
+import Servicios from '../components/sections/Servicios.astro';
+import Proceso from '../components/sections/Proceso.astro';
+import Planes from '../components/sections/Planes.astro';
+import Proyectos from '../components/sections/Proyectos.astro';
+import Contacto from '../components/sections/Contacto.astro';
+import Footer from '../components/layout/Footer.astro';
+---
+
+<BaseLayout>
+  <Nav />
+  <main>
+    <Hero />
+    <Servicios />
+    <Proceso />
+    <Planes />
+    <Proyectos />
+    <Contacto />
+  </main>
+  <Footer />
+</BaseLayout>
+
+<script>
+  const io = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) {
+          e.target.classList.add('in');
+          io.unobserve(e.target);
+        }
+      });
+    },
+    { threshold: 0.12 }
+  );
+  document.querySelectorAll('.reveal').forEach((el, i) => {
+    (el as HTMLElement).style.transitionDelay = ((i % 4) * 60) + 'ms';
+    io.observe(el);
+  });
+</script>

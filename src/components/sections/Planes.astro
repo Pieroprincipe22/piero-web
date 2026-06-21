@@ -1,0 +1,38 @@
+---
+import { planes } from '../../data/planes';
+const check = '<path d="M5 12l5 5L20 6"/>';
+---
+
+<section class="section" id="planes">
+  <div class="wrap">
+    <div class="section__head reveal">
+      <span class="eyebrow">Planes</span>
+      <h2>Precios para todo tipo de clientes</h2>
+      <p>Cada proyecto es distinto, así que el precio final depende de lo que necesites. Estos son los puntos de partida.</p>
+    </div>
+    <div class="grid-plan">
+      {
+        planes.map((plan) => (
+          <div class={`plan reveal${plan.destacado ? ' plan--featured' : ''}`}>
+            <span class="plan__badge">{plan.badge}</span>
+            <h3>{plan.titulo}</h3>
+            <p class="plan__desc">{plan.desc}</p>
+            <div class="plan__price">
+              {plan.precio ? plan.precio : <>A medida<small> · presupuesto</small></>}
+            </div>
+            <ul>
+              {plan.incluye.map((item) => (
+                <li>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" set:html={check} />
+                  {item}
+                </li>
+              ))}
+            </ul>
+            <a href="#contacto" class={`btn ${plan.destacado ? 'btn--primary' : 'btn--ghost'}`}>{plan.cta}</a>
+          </div>
+        ))
+      }
+    </div>
+    <p class="plan-note">// Los precios finales dependen de cada proyecto. Cuéntame qué necesitas y te paso un presupuesto cerrado.</p>
+  </div>
+</section>
