@@ -49,6 +49,6 @@ export const planes: Plan[] = [
       'Reservas, usuarios o catálogo',
       'Funcionalidades a tu medida',
     ],
-    cta: 'Cuéntame tu idea',
+    cta: 'Cuéntanos tu idea',
   },
 ];
