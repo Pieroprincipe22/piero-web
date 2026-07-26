@@ -200,6 +200,15 @@ h1, h2, h3 {
 .field input:focus, .field textarea:focus { outline: none; border-color: var(--brand); }
 .field textarea { resize: vertical; min-height: 110px; }
 .form .btn { justify-content: center; margin-top: 4px; }
+/* Campo trampa anti-bots: fuera de la vista, pero presente en el formulario.
+   No usamos display:none porque muchos bots lo detectan y lo ignoran. */
+.hp {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
 .form__msg { font-size: 0.9rem; text-align: center; min-height: 1.2em; }
 .form__msg--ok { color: #7fe3c0; }
 .form__msg--err { color: #ff8a72; }

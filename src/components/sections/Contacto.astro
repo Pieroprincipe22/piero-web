@@ -42,9 +42,14 @@ const waLink = site.whatsapp
     </div>
 
     <form class="form reveal" id="contactForm">
-      <div class="field"><label for="n">Nombre</label><input id="n" name="nombre" type="text" placeholder="Tu nombre" required /></div>
-      <div class="field"><label for="e">Email</label><input id="e" name="email" type="email" placeholder="tu@email.com" required /></div>
-      <div class="field"><label for="m">¿Qué necesitas?</label><textarea id="m" name="mensaje" placeholder="Cuéntame brevemente tu proyecto…" required></textarea></div>
+      {/* Trampa anti-bots: invisible para personas, los robots la rellenan. */}
+      <div class="hp" aria-hidden="true">
+        <label for="website">No rellenar</label>
+        <input id="website" name="website" type="text" tabindex="-1" autocomplete="off" />
+      </div>
+      <div class="field"><label for="n">Nombre</label><input id="n" name="nombre" type="text" placeholder="Tu nombre" maxlength="80" required /></div>
+      <div class="field"><label for="e">Email</label><input id="e" name="email" type="email" placeholder="tu@email.com" maxlength="120" required /></div>
+      <div class="field"><label for="m">¿Qué necesitas?</label><textarea id="m" name="mensaje" placeholder="Cuéntame brevemente tu proyecto…" maxlength="2000" required></textarea></div>
       <button type="submit" class="btn btn--signal" id="submitBtn">Enviar mensaje →</button>
       <p class="form__msg" id="formMsg" role="status" aria-live="polite"></p>
     </form>
@@ -55,6 +60,7 @@ const waLink = site.whatsapp
   const form = document.getElementById('contactForm') as HTMLFormElement | null;
   const msg = document.getElementById('formMsg');
   const btn = document.getElementById('submitBtn') as HTMLButtonElement | null;
+  const cargadoEn = Date.now();
 
   form?.addEventListener('submit', async (ev) => {
     ev.preventDefault();
@@ -66,18 +72,22 @@ const waLink = site.whatsapp
     btn.textContent = 'Enviando…';
 
     const data = Object.fromEntries(new FormData(form).entries());
+    // Marca de tiempo: el servidor descarta envíos instantáneos (bots).
+    data.ts = String(cargadoEn);
     try {
       const res = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
-      if (!res.ok) throw new Error('error');
+      const resultado = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(resultado.error || 'error');
       form.reset();
       msg.textContent = '¡Mensaje enviado! Te respondo lo antes posible.';
       msg.classList.add('form__msg--ok');
-    } catch {
-      msg.textContent = 'No se pudo enviar. Escríbeme directamente por email o WhatsApp.';
+    } catch (e) {
+      const detalle = e instanceof Error && e.message !== 'error' ? e.message : '';
+      msg.textContent = detalle || 'No se pudo enviar. Escríbeme directamente por email o WhatsApp.';
       msg.classList.add('form__msg--err');
     } finally {
       btn.disabled = false;

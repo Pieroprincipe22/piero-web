@@ -2,6 +2,7 @@
 import { defineConfig } from 'astro/config';
 import vercel from '@astrojs/vercel';
 import tailwindcss from '@tailwindcss/vite';
+import sitemap from '@astrojs/sitemap';
 
 // https://astro.build/config
 export default defineConfig({
@@ -9,8 +10,9 @@ export default defineConfig({
   // función serverless aparte (src/pages/api/contact.ts con prerender=false).
   output: 'static',
   adapter: vercel(),
-  // CAMBIA esto por tu dominio final cuando lo tengas en IONOS:
-  site: 'https://piero.dev',
+  // Dominio final en producción (ya conectado en Vercel + IONOS):
+  site: 'https://www.kodaestudio.com',
+  integrations: [sitemap()],
   vite: {
     plugins: [tailwindcss()],
   },

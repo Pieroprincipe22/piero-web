@@ -16,7 +16,7 @@ export const servicios: Servicio[] = [
     icono: 'db',
     titulo: 'Webs con base de datos',
     texto:
-      'Reservas, catálogos, paneles, usuarios… Si tu web necesita guardar y gestionar información, la construyo a medida.',
+      'Reservas, catálogos, paneles, usuarios… Si tu web necesita guardar y gestionar información, la construimos a medida.',
   },
   {
     icono: 'code',

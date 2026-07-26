@@ -5,22 +5,22 @@
 
 export const site = {
   // Marca
-  brand: 'Piero',
-  mark: 'π', // símbolo del logo (tus iniciales Piero Iparraguirre)
+  brand: 'Koda Estudio',
+  mark: 'K', // símbolo del logo
   tagline: 'Desarrollo web a medida',
 
-  // Dominio final (cuando lo tengas en IONOS). Se usa para SEO.
-  domain: 'https://piero.dev',
+  // Dominio final en producción (ya conectado en Vercel + IONOS).
+  domain: 'https://www.kodaestudio.com',
 
   // SEO
-  title: 'Piero — Desarrollo web a medida para tu negocio',
+  title: 'Koda Estudio — Desarrollo web a medida para tu negocio',
   description:
-    'Diseño y programo webs a medida para negocios: rápidas, con base de datos cuando hace falta y con precios cómodos para todo tipo de clientes.',
+    'Diseñamos y programamos webs a medida para negocios: rápidas, con base de datos cuando hace falta y con precios cómodos para todo tipo de clientes.',
 
   // Contacto  ← RELLENA con tus datos reales
-  email: 'hola@piero.dev', //  ← tu email
+  email: 'hola@kodaestudio.com', //  ← PENDIENTE: crea este buzón en IONOS o Resend antes de publicarlo
   whatsapp: '', //  ← solo números con prefijo, ej: '34600112233'. Vacío = oculta el botón.
-  whatsappTexto: 'Hola Piero, quiero información sobre una web.',
+  whatsappTexto: 'Hola, quiero información sobre una web.',
   ciudad: 'Barcelona', //  ← tu zona de trabajo
 
   // Redes (opcional, vacío = no se muestra)
