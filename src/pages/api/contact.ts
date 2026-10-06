@@ -168,17 +168,23 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
   }
 
   // 9) Avisar por email.
+  //    Las opiniones de la página /demo llegan con el prefijo "[Demo Koda".
+  const esDemo = mensaje.startsWith('[Demo Koda');
   if (env.RESEND_API_KEY && env.MAIL_FROM && env.MAIL_TO) {
     try {
       const resend = new Resend(env.RESEND_API_KEY);
-      await resend.emails.send({
+      // Ojo: Resend NO lanza un error cuando falla; lo devuelve en `error`.
+      const { error } = await resend.emails.send({
         from: env.MAIL_FROM,
         to: env.MAIL_TO,
         replyTo: email,
-        subject: `Nuevo cliente desde la web — ${nombre}`,
+        subject: esDemo
+          ? `Opinión de la demo de Koda — ${nombre}`
+          : `Nuevo cliente desde la web — ${nombre}`,
         text: `Nombre: ${nombre}\nEmail: ${email}\n\nMensaje:\n${mensaje}`,
       });
-      avisado = true;
+      if (!error) avisado = true;
+      else console.error('Resend rechazó el envío');
     } catch {
       console.error('Resend no disponible');
     }

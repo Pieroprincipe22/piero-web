@@ -1,0 +1,269 @@
+---
+// Página privada para probadores invitados: no sale en el menú,
+// no se indexa (noindex) y no aparece en el sitemap.
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Footer from '../components/layout/Footer.astro';
+import { site } from '../data/site';
+import { demo } from '../data/demo';
+---
+
+<BaseLayout
+  title={`Prueba Koda ${demo.version} — ${site.brand}`}
+  description="Versión de prueba de Koda, asistente de voz en español para Windows. Acceso solo con invitación."
+  noindex
+>
+  <header class="nav scrolled">
+    <div class="wrap nav__inner">
+      <a href="/" class="logo"><span class="logo__mark"><span>{site.mark}</span></span>{site.brand}</a>
+      <a href="/" class="btn btn--ghost">← Web</a>
+    </div>
+  </header>
+
+  <main>
+    <!-- ───────── Hero + descarga ───────── -->
+    <section class="hero">
+      <div class="wrap hero__grid">
+        <div>
+          <span class="eyebrow">Acceso anticipado · Solo con invitación</span>
+          <h1>Prueba <em>Koda</em> antes que nadie</h1>
+          <p class="hero__sub">
+            Un asistente de voz en español para Windows. Eres de los primeros en probarlo: es una
+            versión temprana y tu opinión es justo lo que necesito para mejorarlo.
+          </p>
+          <div class="hero__actions">
+            <a href={demo.descargaUrl} class="btn btn--signal">Descargar Koda {demo.version} ↓</a>
+            <a href="#instalar" class="btn btn--ghost">Cómo instalarlo</a>
+          </div>
+          <div class="hero__meta">
+            <div><b>{demo.version}</b>Versión</div>
+            <div><b>{demo.sistema}</b>Sistema</div>
+            {demo.tamano && <div><b>{demo.tamano}</b>Tamaño</div>}
+          </div>
+          <p class="req">Necesitas: {demo.requisitos.join(' · ')}</p>
+        </div>
+
+        <div class="ai-card" role="note" aria-label="Aviso: Koda es una inteligencia artificial">
+          <div class="orb" aria-hidden="true"></div>
+          <span class="ai-card__tag">Aviso</span>
+          <p class="ai-card__title">Koda es una inteligencia artificial.</p>
+          <p class="ai-card__text">
+            No es una persona. Lee los avisos de abajo antes de empezar: te explican qué pasa con lo
+            que le dices.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ───────── Instalación ───────── -->
+    <section class="section proceso" id="instalar">
+      <div class="wrap">
+        <div class="section__head">
+          <span class="eyebrow">Instalación</span>
+          <h2>En cuatro pasos</h2>
+          <p>Unos dos minutos. Si algo no cuadra, escríbeme y lo vemos juntos.</p>
+        </div>
+        <div class="steps">
+          {
+            demo.pasos.map((paso, i) => (
+              <div class="step">
+                <span class="step__n">{String(i + 1).padStart(2, '0')}</span>
+                <h3>{paso.titulo}</h3>
+                <p>{paso.texto}</p>
+              </div>
+            ))
+          }
+        </div>
+      </div>
+    </section>
+
+    <!-- ───────── Avisos ───────── -->
+    <section class="section" id="avisos">
+      <div class="wrap">
+        <div class="section__head">
+          <span class="eyebrow">Antes de empezar</span>
+          <h2>Lo que debes saber</h2>
+        </div>
+        <div class="grid-serv">
+          {
+            demo.avisos.map((aviso, i) => (
+              <div class={`card ${i % 2 ? 'card--accent' : ''}`}>
+                <h3>{aviso.titulo}</h3>
+                <p>{aviso.texto}</p>
+              </div>
+            ))
+          }
+        </div>
+      </div>
+    </section>
+
+    <!-- ───────── Opinión ───────── -->
+    <section class="section contacto" id="opinion">
+      <div class="wrap cta-grid">
+        <div>
+          <span class="eyebrow">Tu opinión</span>
+          <h2>¿Qué tal te ha ido?</h2>
+          <p class="lead">
+            Rellena lo que quieras: con una sola respuesta ya me ayudas. Si algo falló, cuéntame qué
+            hiciste justo antes.
+          </p>
+        </div>
+
+        <form class="form" id="feedbackForm" data-version={demo.version}>
+          <div class="hp" aria-hidden="true">
+            <label for="website">No rellenar</label>
+            <input id="website" name="website" type="text" tabindex="-1" autocomplete="off" />
+          </div>
+          <div class="field">
+            <label for="fb-n">Nombre</label>
+            <input id="fb-n" name="nombre" type="text" placeholder="Tu nombre" maxlength="80" required />
+          </div>
+          <div class="field">
+            <label for="fb-e">Email</label>
+            <input id="fb-e" name="email" type="email" placeholder="tu@email.com" maxlength="120" required />
+          </div>
+          {
+            demo.preguntas.map((p) => (
+              <div class="field">
+                <label for={`fb-${p.id}`}>{p.label}</label>
+                <textarea
+                  id={`fb-${p.id}`}
+                  name={p.id}
+                  data-pregunta={p.label}
+                  placeholder={p.placeholder}
+                  maxlength="550"
+                  rows="3"
+                ></textarea>
+              </div>
+            ))
+          }
+          <button type="submit" class="btn btn--signal" id="fbBtn">Enviar opinión →</button>
+          <p class="form__msg" id="fbMsg" role="status" aria-live="polite"></p>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <Footer />
+</BaseLayout>
+
+<style>
+  .req {
+    margin-top: 1.4rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--muted);
+  }
+
+  /* Tarjeta del aviso de IA, con un orbe en CSS que recuerda al rostro de Koda */
+  .ai-card {
+    position: relative;
+    background: var(--ink-deep);
+    color: #fff;
+    border-radius: var(--r);
+    padding: 40px 32px 34px;
+    box-shadow: 0 30px 60px -30px rgba(20, 23, 28, 0.45);
+    overflow: hidden;
+    text-align: center;
+  }
+  .orb {
+    width: 132px;
+    height: 132px;
+    margin: 0 auto 26px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #b9c0ff 0%, #5a67ff 32%, var(--brand) 58%, #0d0f14 100%);
+    box-shadow: 0 0 60px -6px #5a67ff, inset 0 0 24px rgba(255, 255, 255, 0.25);
+    animation: respira 4.5s ease-in-out infinite;
+  }
+  @keyframes respira {
+    0%, 100% { transform: scale(1); box-shadow: 0 0 50px -10px #5a67ff, inset 0 0 24px rgba(255, 255, 255, 0.2); }
+    50% { transform: scale(1.05); box-shadow: 0 0 80px -4px #5a67ff, inset 0 0 30px rgba(255, 255, 255, 0.35); }
+  }
+  .ai-card__tag {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: var(--signal);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem;
+    padding: 0.35rem 0.7rem;
+    border-radius: 8px;
+  }
+  .ai-card__title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.45rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.6rem;
+  }
+  .ai-card__text {
+    color: #9aa2b3;
+    font-size: 1rem;
+    max-width: 24rem;
+    margin: 0 auto;
+  }
+
+  /* Las tarjetas de avisos no llevan icono: algo menos de aire arriba */
+  #avisos .card { padding-top: 26px; }
+
+  /* Tres preguntas: textareas más bajas que las del formulario de contacto */
+  #feedbackForm textarea { min-height: 84px; }
+</style>
+
+<script>
+  const form = document.getElementById('feedbackForm') as HTMLFormElement | null;
+  const msg = document.getElementById('fbMsg');
+  const btn = document.getElementById('fbBtn') as HTMLButtonElement | null;
+  const cargadoEn = Date.now();
+
+  form?.addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    if (!form || !msg || !btn) return;
+    msg.className = 'form__msg';
+    msg.textContent = '';
+
+    // Junta las tres respuestas en un solo mensaje para /api/contact.
+    const bloques: string[] = [];
+    form.querySelectorAll<HTMLTextAreaElement>('textarea[data-pregunta]').forEach((t) => {
+      const valor = t.value.trim();
+      if (valor) bloques.push(`${t.dataset.pregunta}\n${valor}`);
+    });
+    if (bloques.length === 0) {
+      msg.textContent = 'Responde al menos una de las tres preguntas.';
+      msg.classList.add('form__msg--err');
+      return;
+    }
+
+    const datos = new FormData(form);
+    const cuerpo = {
+      nombre: String(datos.get('nombre') ?? ''),
+      email: String(datos.get('email') ?? ''),
+      website: String(datos.get('website') ?? ''),
+      // El prefijo permite a /api/contact distinguirlo de un cliente.
+      mensaje: `[Demo Koda ${form.dataset.version}]\n\n${bloques.join('\n\n')}`,
+      ts: String(cargadoEn),
+    };
+
+    btn.disabled = true;
+    const original = btn.textContent;
+    btn.textContent = 'Enviando…';
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(cuerpo),
+      });
+      const resultado = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(resultado.error || 'error');
+      form.reset();
+      msg.textContent = '¡Gracias! Me ha llegado tu opinión.';
+      msg.classList.add('form__msg--ok');
+    } catch (e) {
+      const detalle = e instanceof Error && e.message !== 'error' ? e.message : '';
+      msg.textContent = detalle || 'No se pudo enviar. Escríbeme directamente y me lo cuentas.';
+      msg.classList.add('form__msg--err');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = original;
+    }
+  });
+</script>

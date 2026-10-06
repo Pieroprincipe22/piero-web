@@ -12,7 +12,8 @@ export default defineConfig({
   adapter: vercel(),
   // Dominio final en producción (ya conectado en Vercel + IONOS):
   site: 'https://www.kodaestudio.com',
-  integrations: [sitemap()],
+  // /demo es privada: fuera del sitemap (además lleva noindex).
+  integrations: [sitemap({ filter: (page) => !page.includes('/demo') })],
   vite: {
     plugins: [tailwindcss()],
   },

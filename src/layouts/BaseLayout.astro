@@ -5,9 +5,11 @@ import { site } from '../data/site';
 interface Props {
   title?: string;
   description?: string;
+  /** true = que Google no la indexe (páginas privadas como /demo). */
+  noindex?: boolean;
 }
 
-const { title = site.title, description = site.description } = Astro.props;
+const { title = site.title, description = site.description, noindex = false } = Astro.props;
 const canonical = new URL(Astro.url.pathname, site.domain).href;
 
 const jsonLd = {
@@ -31,6 +33,7 @@ const jsonLd = {
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
 
     <!-- Open Graph -->
     <meta property="og:type" content="website" />
