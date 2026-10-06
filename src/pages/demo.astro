@@ -5,6 +5,11 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Footer from '../components/layout/Footer.astro';
 import { site } from '../data/site';
 import { demo } from '../data/demo';
+
+// Se genera en el servidor en cada visita (no como archivo estático).
+// Motivo: Vercel no servía la versión estática en /demo (daba 404),
+// y así usa la misma ruta que /api/contact, que sí funciona.
+export const prerender = false;
 ---
 
 <BaseLayout
@@ -263,7 +268,4 @@ import { demo } from '../data/demo';
       msg.classList.add('form__msg--err');
     } finally {
       btn.disabled = false;
-      btn.textContent = original;
-    }
-  });
-</script>
+      btn.textContent
