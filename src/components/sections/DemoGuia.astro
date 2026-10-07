@@ -1,0 +1,671 @@
+---
+// Sección de /demo: guía de primeros ajustes de Koda, en carrusel.
+//
+// Los TEXTOS de cada paso están en src/data/demo.ts (demo.guia).
+// Los DIBUJOS no son capturas: son la ventana de Koda imitada con HTML y CSS.
+// Así no hay imágenes que mantener y se ven nítidos en el móvil. Si cambian
+// los nombres del menú o de Ajustes en Koda, se cambian aquí (menu, pestanas
+// y el bloque de cada dibujo, más abajo).
+import { demo } from '../../data/demo';
+
+const { guia } = demo;
+
+const menu = ['Inicio', 'Mis apps', 'Tareas', 'Recordatorios', 'Memoria', 'Configuración'];
+const pestanas = ['General', 'Apariencia', 'Ubicación', 'Permisos'];
+const permisos = [
+  'Abrir apps y navegar',
+  'Gestionar archivos y sistema',
+  'Conversar con IA (Claude)',
+  'Búsqueda web (noticias, clima)',
+];
+
+// Qué enseña el dibujo de cada ficha: qué entrada del menú se pulsa y,
+// si es Ajustes, qué pestaña.
+const dibujos: Record<string, { menu: string; pestana?: string }> = {
+  nombre: { menu: 'Configuración', pestana: 'General' },
+  busqueda: { menu: 'Configuración', pestana: 'Permisos' },
+  ciudad: { menu: 'Configuración', pestana: 'Ubicación' },
+  vision: { menu: 'Configuración', pestana: 'Permisos' },
+  apps: { menu: 'Mis apps' },
+};
+---
+
+<section class="section guia" id="guia">
+  <div class="wrap">
+    <div class="section__head">
+      <span class="eyebrow">{guia.etiqueta}</span>
+      <h2>{guia.titulo}</h2>
+      <p>{guia.texto}</p>
+    </div>
+
+    <div class="carrusel" data-guia aria-roledescription="carrusel" aria-label={guia.titulo}>
+      <div class="carrusel__fichas">
+        {
+          guia.fichas.map((f, i) => (
+            <button type="button" class="ficha" data-ficha>
+              <span class="ficha__n">{i + 1}</span>
+              {f.corto}
+            </button>
+          ))
+        }
+      </div>
+
+      <div class="carrusel__pista" data-pista tabindex="0">
+        {
+          guia.fichas.map((f, i) => {
+            const d = dibujos[f.id] ?? { menu: 'Configuración' };
+            return (
+              <article
+                class="diapo"
+                data-diapo
+                role="group"
+                aria-roledescription="diapositiva"
+                aria-label={`${i + 1} de ${guia.fichas.length}: ${f.corto}`}
+              >
+                <div>
+                  <h3>{f.titulo}</h3>
+                  <p class="diapo__texto">{f.texto}</p>
+                  <ol class="diapo__pasos">
+                    {f.pasos.map((paso, k) => (
+                      <li>
+                        <span class="pin">{k + 1}</span>
+                        <span>{paso}</span>
+                      </li>
+                    ))}
+                  </ol>
+                  {f.prueba && (
+                    <p class="diapo__prueba">
+                      <b>Prueba:</b> {f.prueba}
+                    </p>
+                  )}
+                  {f.nota && <p class="diapo__nota">{f.nota}</p>}
+                </div>
+
+                {/* Dibujo de la ventana de Koda. Decorativo: los pasos ya están en el texto. */}
+                <div class="mock" aria-hidden="true">
+                  <div class="mock__barra">
+                    <i />
+                    Koda
+                  </div>
+                  <div class="mock__cuerpo">
+                    <div class="mock__menu">
+                      <b class="mock__marca">KODA</b>
+                      {menu.map((item) => (
+                        <div class={`mock__item ${item === d.menu ? 'es-objetivo' : ''}`}>
+                          <i />
+                          {item}
+                          {item === d.menu && <span class="pin">1</span>}
+                        </div>
+                      ))}
+                    </div>
+
+                    <div class="mock__panel">
+                      {d.pestana && (
+                        <>
+                          <b class="mock__titulo">Ajustes</b>
+                          <div class="mock__pestanas">
+                            {pestanas.map((p) => (
+                              <span class={p === d.pestana ? 'es-objetivo' : ''}>
+                                {p}
+                                {p === d.pestana && <span class="pin">2</span>}
+                              </span>
+                            ))}
+                          </div>
+                        </>
+                      )}
+
+                      {f.id === 'nombre' && (
+                        <>
+                          <span class="mock__seccion">SU NOMBRE</span>
+                          <span class="mock__info">¿Cómo desea que Koda se dirija a usted?</span>
+                          <div class="mock__campo es-objetivo">
+                            <span>Laura</span>
+                            <span class="pin">3</span>
+                          </div>
+                        </>
+                      )}
+
+                      {f.id === 'busqueda' && (
+                        <div class="mock__lista">
+                          {permisos.map((p, k) => (
+                            <div class={`mock__check ${k === permisos.length - 1 ? 'es-objetivo' : ''}`}>
+                              <i>✓</i>
+                              <span>{p}</span>
+                              {k === permisos.length - 1 && <span class="pin">3</span>}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {f.id === 'ciudad' && (
+                        <>
+                          <span class="mock__seccion">UBICACIÓN</span>
+                          <span class="mock__etq">Ciudad</span>
+                          <div class="mock__campo es-objetivo">
+                            <span>Sabadell</span>
+                            <span class="pin">3</span>
+                          </div>
+                          <span class="mock__etq">País</span>
+                          <div class="mock__campo">
+                            <span>España</span>
+                            <span class="mock__flecha">▾</span>
+                          </div>
+                        </>
+                      )}
+
+                      {f.id === 'vision' && (
+                        <div class="mock__lista">
+                          <span class="mock__seccion">CÁMARA</span>
+                          <div class="mock__check es-objetivo">
+                            <i>✓</i>
+                            <span>Usar la cámara cuando se lo pida</span>
+                            <span class="pin">3</span>
+                          </div>
+                          <span class="mock__seccion">PANTALLA</span>
+                          <div class="mock__check es-objetivo">
+                            <i>✓</i>
+                            <span>Ver la pantalla cuando se lo pida</span>
+                            <span class="pin">4</span>
+                          </div>
+                        </div>
+                      )}
+
+                      {f.id === 'apps' && (
+                        <>
+                          <b class="mock__titulo">Mis aplicaciones</b>
+                          <div class="mock__boton es-objetivo">
+                            <span>＋ Añadir aplicación</span>
+                            <span class="pin">2</span>
+                          </div>
+                          <span class="mock__info">¿Con qué nombre quieres que Koda reconozca esta app?</span>
+                          <div class="mock__campo es-objetivo">
+                            <span>spotify</span>
+                            <span class="pin">3</span>
+                          </div>
+                          <div class="mock__guardar">Guardar</div>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </article>
+            );
+          })
+        }
+      </div>
+
+      <div class="carrusel__pie">
+        <button type="button" class="flecha" data-ant aria-label="Paso anterior">←</button>
+        <span class="carrusel__cuenta" data-cuenta aria-live="polite">1 / {guia.fichas.length}</span>
+        <button type="button" class="flecha" data-sig aria-label="Paso siguiente">→</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .guia {
+    background: var(--surface);
+    border-bottom: 1px solid var(--line);
+  }
+  .guia .section__head {
+    margin-bottom: 32px;
+  }
+
+  /* ---------- Fichas (una por ajuste) ---------- */
+  .carrusel__fichas {
+    position: relative;
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 6px;
+    margin-bottom: 26px;
+    scrollbar-width: none;
+  }
+  .carrusel__fichas::-webkit-scrollbar {
+    display: none;
+  }
+  .ficha {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.5rem 1rem 0.5rem 0.5rem;
+    border-radius: 999px;
+    border: 1.5px solid var(--line);
+    background: transparent;
+    color: var(--muted);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.92rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s, background 0.2s;
+  }
+  .ficha__n {
+    display: grid;
+    place-items: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 50%;
+    background: var(--paper);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+  }
+  .ficha:hover {
+    border-color: var(--ink);
+    color: var(--ink);
+  }
+  .ficha.activa {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: #fff;
+  }
+  .ficha.activa .ficha__n {
+    background: var(--signal);
+    color: #fff;
+  }
+  .ficha:focus-visible,
+  .flecha:focus-visible,
+  .carrusel__pista:focus-visible {
+    outline: 3px solid var(--brand);
+    outline-offset: 3px;
+  }
+
+  /* ---------- Pista: las diapositivas se deslizan de lado ---------- */
+  .carrusel__pista {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    border-radius: var(--r);
+  }
+  .carrusel__pista::-webkit-scrollbar {
+    display: none;
+  }
+  .diapo {
+    flex: 0 0 100%;
+    scroll-snap-align: start;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 56px;
+    align-items: center;
+    padding: 4px;
+  }
+  .diapo h3 {
+    font-size: clamp(1.5rem, 2.8vw, 2rem);
+    margin-bottom: 0.7rem;
+  }
+  .diapo__texto {
+    color: var(--muted);
+    font-size: 1.05rem;
+    max-width: 32rem;
+  }
+  .diapo__pasos {
+    list-style: none;
+    display: grid;
+    gap: 13px;
+    margin: 1.5rem 0 0;
+  }
+  .diapo__pasos li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.8rem;
+    font-size: 1.02rem;
+  }
+  .diapo__prueba {
+    margin-top: 1.4rem;
+    padding: 0.8rem 1rem;
+    border-radius: 12px;
+    background: var(--brand-soft);
+    font-size: 0.98rem;
+  }
+  .diapo__prueba b {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--brand);
+    font-weight: 500;
+    margin-right: 0.3rem;
+  }
+  .diapo__nota {
+    margin-top: 0.9rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.76rem;
+    color: var(--muted);
+  }
+
+  /* Número de paso: el mismo círculo en la lista y en el dibujo. */
+  .pin {
+    flex-shrink: 0;
+    display: inline-grid;
+    place-items: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 50%;
+    background: var(--signal);
+    color: #fff;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    font-weight: 500;
+    line-height: 1;
+  }
+
+  /* ---------- Pie: flechas y contador ---------- */
+  .carrusel__pie {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 28px;
+  }
+  .flecha {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1.5px solid var(--line);
+    background: transparent;
+    color: var(--ink);
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: border-color 0.2s, opacity 0.2s;
+  }
+  .flecha:hover:not(:disabled) {
+    border-color: var(--ink);
+  }
+  .flecha:disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
+  .carrusel__cuenta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--muted);
+    min-width: 3.5rem;
+    text-align: center;
+  }
+
+  /* ---------- Dibujo de la ventana de Koda ---------- */
+  .mock {
+    --k-fondo: #0a0616;
+    --k-panel: #130c26;
+    --k-linea: #2a1f47;
+    --k-lila: #b197fc;
+    --k-texto: #e7e1fb;
+    --k-suave: #8d84a8;
+    container-type: inline-size;
+    background: var(--k-fondo);
+    color: var(--k-texto);
+    border-radius: var(--r);
+    overflow: hidden;
+    font-size: 0.8rem;
+  }
+  .mock .pin {
+    width: 1.25rem;
+    height: 1.25rem;
+    font-size: 0.64rem;
+    margin-left: auto;
+    box-shadow: 0 0 0 3px rgba(255, 93, 59, 0.25);
+  }
+  .mock__barra {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.55rem 0.9rem;
+    background: #f4f4f6;
+    color: #3d4350;
+    font-size: 0.72rem;
+  }
+  .mock__barra i {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 2px solid #2bb3c0;
+  }
+  .mock__cuerpo {
+    display: grid;
+    grid-template-columns: 0.8fr 1.25fr;
+    min-height: 268px;
+  }
+  .mock__menu {
+    padding: 18px 0 20px;
+    border-right: 1px solid var(--k-linea);
+    display: grid;
+    gap: 2px;
+    align-content: start;
+  }
+  .mock__marca {
+    font-family: 'Space Grotesk', sans-serif;
+    letter-spacing: 0.28em;
+    color: var(--k-lila);
+    padding: 0 16px 12px;
+    font-size: 0.86rem;
+  }
+  .mock__item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.5rem 12px 0.5rem 16px;
+    color: var(--k-suave);
+    border-left: 2px solid transparent;
+  }
+  .mock__item i {
+    width: 6px;
+    height: 6px;
+    background: var(--k-lila);
+    transform: rotate(45deg);
+    flex-shrink: 0;
+  }
+  .mock__item.es-objetivo {
+    color: #fff;
+    background: var(--k-panel);
+    border-left-color: var(--signal);
+  }
+  .mock__panel {
+    padding: 18px 16px 20px;
+    background: var(--k-panel);
+    min-width: 0;
+    display: grid;
+    gap: 8px;
+    align-content: start;
+  }
+  .mock__titulo {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.86rem;
+    margin-bottom: 4px;
+  }
+  .mock__pestanas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+    border-bottom: 1px solid var(--k-linea);
+    margin-bottom: 6px;
+    color: var(--k-suave);
+    font-size: 0.72rem;
+  }
+  .mock__pestanas > span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding-bottom: 8px;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+  }
+  .mock__pestanas > span.es-objetivo {
+    color: #fff;
+    border-bottom-color: var(--k-lila);
+  }
+  .mock__seccion {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.14em;
+    color: var(--k-lila);
+    margin-top: 4px;
+  }
+  .mock__info,
+  .mock__etq {
+    color: var(--k-suave);
+    font-size: 0.72rem;
+  }
+  .mock__etq {
+    color: var(--k-texto);
+  }
+  .mock__lista {
+    display: grid;
+    gap: 6px;
+  }
+  .mock__campo,
+  .mock__check,
+  .mock__boton {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.45rem 0.6rem;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    font-size: 0.74rem;
+  }
+  .mock__campo {
+    background: var(--k-fondo);
+    border-color: var(--k-linea);
+    color: #fff;
+  }
+  .mock__flecha {
+    margin-left: auto;
+    color: var(--k-suave);
+  }
+  .mock__check {
+    color: var(--k-suave);
+  }
+  .mock__check i {
+    flex-shrink: 0;
+    display: grid;
+    place-items: center;
+    width: 15px;
+    height: 15px;
+    border-radius: 4px;
+    background: var(--k-lila);
+    color: var(--k-fondo);
+    font-style: normal;
+    font-size: 0.62rem;
+    font-weight: 700;
+  }
+  .mock__boton {
+    background: var(--k-lila);
+    color: var(--k-fondo);
+    font-weight: 600;
+  }
+  .mock__guardar {
+    justify-self: end;
+    padding: 0.35rem 0.9rem;
+    border-radius: 8px;
+    background: var(--k-lila);
+    color: var(--k-fondo);
+    font-size: 0.72rem;
+    font-weight: 600;
+  }
+  .mock__campo.es-objetivo,
+  .mock__check.es-objetivo,
+  .mock__boton.es-objetivo {
+    border-color: var(--signal);
+    color: #fff;
+  }
+  .mock__campo.es-objetivo,
+  .mock__check.es-objetivo {
+    background: rgba(255, 93, 59, 0.08);
+  }
+  .mock__boton.es-objetivo {
+    color: var(--k-fondo);
+    box-shadow: 0 0 0 2px var(--signal);
+  }
+
+  /* En un dibujo estrecho (móvil), el menú va arriba y solo enseña la entrada que se pulsa. */
+  @container (max-width: 440px) {
+    .mock__cuerpo {
+      grid-template-columns: 1fr;
+      min-height: 0;
+    }
+    .mock__menu {
+      border-right: none;
+      border-bottom: 1px solid var(--k-linea);
+      padding-bottom: 14px;
+    }
+    .mock__item:not(.es-objetivo) {
+      display: none;
+    }
+  }
+
+  @media (max-width: 880px) {
+    .diapo {
+      grid-template-columns: 1fr;
+      gap: 28px;
+      align-items: start;
+    }
+  }
+</style>
+
+<script>
+  // Carrusel sin librerías. Sin JavaScript sigue funcionando: la pista se
+  // puede deslizar con el dedo o con el ratón.
+  const raiz = document.querySelector<HTMLElement>('[data-guia]');
+  const pista = raiz?.querySelector<HTMLElement>('[data-pista]');
+
+  if (raiz && pista) {
+    const fichas = Array.from(raiz.querySelectorAll<HTMLButtonElement>('[data-ficha]'));
+    const anterior = raiz.querySelector<HTMLButtonElement>('[data-ant]');
+    const siguiente = raiz.querySelector<HTMLButtonElement>('[data-sig]');
+    const cuenta = raiz.querySelector<HTMLElement>('[data-cuenta]');
+    const total = fichas.length;
+    const suave = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let actual = -1;
+
+    const marcar = (i: number) => {
+      if (i === actual) return;
+      actual = i;
+      fichas.forEach((f, k) => {
+        f.classList.toggle('activa', k === i);
+        f.setAttribute('aria-current', k === i ? 'true' : 'false');
+      });
+      if (anterior) anterior.disabled = i === 0;
+      if (siguiente) siguiente.disabled = i === total - 1;
+      if (cuenta) cuenta.textContent = `${i + 1} / ${total}`;
+      // Mantiene a la vista la ficha activa cuando no caben todas (móvil).
+      const tira = fichas[i]?.parentElement;
+      if (tira && fichas[i]) {
+        const destino = fichas[i].offsetLeft - (tira.clientWidth - fichas[i].offsetWidth) / 2;
+        tira.scrollTo({ left: destino, behavior: suave ? 'smooth' : 'auto' });
+      }
+    };
+
+    const ir = (i: number) => {
+      const n = Math.max(0, Math.min(total - 1, i));
+      pista.scrollTo({ left: n * pista.clientWidth, behavior: suave ? 'smooth' : 'auto' });
+      marcar(n);
+    };
+
+    fichas.forEach((f, i) => f.addEventListener('click', () => ir(i)));
+    anterior?.addEventListener('click', () => ir(actual - 1));
+    siguiente?.addEventListener('click', () => ir(actual + 1));
+
+    // Al deslizar con el dedo, actualiza la ficha activa.
+    let espera = 0;
+    pista.addEventListener(
+      'scroll',
+      () => {
+        window.clearTimeout(espera);
+        espera = window.setTimeout(() => {
+          marcar(Math.round(pista.scrollLeft / pista.clientWidth));
+        }, 80);
+      },
+      { passive: true }
+    );
+
+    // Con el foco en la pista, las flechas del teclado cambian de paso.
+    pista.addEventListener('keydown', (ev) => {
+      if (ev.key === 'ArrowRight') { ev.preventDefault(); ir(actual + 1); }
+      if (ev.key === 'ArrowLeft') { ev.preventDefault(); ir(actual - 1); }
+    });
+
+    marcar(0);
+  }
+</script>

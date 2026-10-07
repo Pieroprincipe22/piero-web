@@ -13,7 +13,7 @@ export const demo = {
   descargaUrl:
     'https://github.com/Pieroprincipe22/koda-demo/releases/latest/download/Koda-demo.zip',
 
-  tamano: '', // ← ej: '140 MB'. Vacío = no se muestra.
+  tamano: '719 MB', // Tamaño del .zip. Vacío = no se muestra.
   sistema: 'Windows 10 u 11', // ← COMPRUEBA en un PC limpio antes de publicarlo
 
   requisitos: ['Micrófono y altavoces o cascos', 'Conexión a internet'],
@@ -26,7 +26,7 @@ export const demo = {
     },
     {
       titulo: 'Pon tu clave',
-      // ← COMPRUEBA desde qué carpeta lee Koda el .env cuando va empaquetado.
+      // Comprobado: Koda empaquetada lee el .env de la carpeta de Koda.exe (main.py).
       texto:
         'Copia el archivo de clave que te he enviado por privado dentro de esa carpeta, junto a Koda.exe.',
     },
@@ -41,6 +41,87 @@ export const demo = {
         'Acepta el permiso del micrófono si Windows lo pide y prueba: hazle una pregunta, pídele la hora o que abra un programa.',
     },
   ],
+
+  // Guía de primeros ajustes, en carrusel. Cada ficha es un ajuste.
+  // `id` enlaza con su dibujo en src/components/sections/DemoGuia.astro:
+  // no lo cambies. Lo demás es texto libre. `prueba` y `nota` son
+  // opcionales (vacío = no se muestra).
+  guia: {
+    etiqueta: 'Primeros ajustes',
+    titulo: 'Deja a Koda a tu gusto',
+    texto:
+      'Koda viene con varias funciones apagadas, para no gastar ni mirar nada sin tu permiso. Estos son los cinco ajustes del primer día.',
+    fichas: [
+      {
+        id: 'nombre',
+        corto: 'Tu nombre',
+        titulo: 'Dile cómo llamarte',
+        texto: 'Koda te habla de usted y por tu nombre. Díselo el primer día.',
+        pasos: [
+          'Pulsa «Configuración», en el menú de la izquierda.',
+          'Quédate en la pestaña «General».',
+          'Escribe tu nombre en «Su nombre» y pulsa Intro.',
+        ],
+        prueba: '',
+        nota: '',
+      },
+      {
+        id: 'busqueda',
+        corto: 'Búsqueda web',
+        titulo: 'Noticias, tiempo y datos de hoy',
+        texto:
+          'Koda viene con la búsqueda en internet apagada. Si le pides las noticias sin activarla, te dirá que no puede.',
+        pasos: [
+          'Pulsa «Configuración», en el menú de la izquierda.',
+          'Abre la pestaña «Permisos».',
+          'Marca «Búsqueda web (noticias, clima)».',
+        ],
+        prueba: '«Koda, dame las noticias de hoy».',
+        nota: 'La prueba incluye 8 búsquedas.',
+      },
+      {
+        id: 'ciudad',
+        corto: 'Tu ciudad',
+        titulo: 'Dile dónde estás',
+        texto: 'Con tu ciudad y tu país, el tiempo y las noticias serán los de tu zona.',
+        pasos: [
+          'Pulsa «Configuración», en el menú de la izquierda.',
+          'Abre la pestaña «Ubicación».',
+          'Escribe tu ciudad y elige tu país.',
+        ],
+        prueba: '«Koda, ¿qué tiempo hace hoy?»',
+        nota: 'Necesita la búsqueda web activada (ajuste 2).',
+      },
+      {
+        id: 'vision',
+        corto: 'Cámara y pantalla',
+        titulo: 'Déjale mirar, solo si quieres',
+        texto:
+          'Koda puede ver por la cámara o mirar tu pantalla. Solo lo hace cuando se lo pides, con una foto cada vez, y viene apagado.',
+        pasos: [
+          'Pulsa «Configuración», en el menú de la izquierda.',
+          'Abre la pestaña «Permisos» y baja.',
+          'En «Cámara», marca «Usar la cámara cuando se lo pida».',
+          'En «Pantalla», marca «Ver la pantalla cuando se lo pida».',
+        ],
+        prueba: '«Koda, ¿qué es esto?» o «Koda, mira mi pantalla».',
+        nota: 'La captura es de toda la pantalla: cierra antes lo que no quieras enseñar.',
+      },
+      {
+        id: 'apps',
+        corto: 'Tus programas',
+        titulo: 'Enséñale tus programas',
+        texto: 'Koda abre los programas que tiene apuntados. Añade los que uses a diario.',
+        pasos: [
+          'Pulsa «Mis apps», en el menú de la izquierda.',
+          'Pulsa «＋ Añadir aplicación» y elige el programa.',
+          'Escribe el nombre con el que lo pedirás y pulsa «Guardar».',
+        ],
+        prueba: '«Koda, abre Spotify».',
+        nota: '',
+      },
+    ],
+  },
 
   avisos: [
     {
