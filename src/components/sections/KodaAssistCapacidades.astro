@@ -1,0 +1,58 @@
+---
+// src/components/sections/KodaAssistCapacidades.astro
+import { kodaAssist } from "../../data/kodaAssist";
+import Icon from "../ui/Icon.astro";
+const { capacidades } = kodaAssist;
+---
+<section class="koda-caps">
+  <div class="mx-auto max-w-6xl px-6 py-20 sm:py-28">
+    <h2 class="koda-caps-title text-3xl font-semibold tracking-tight sm:text-4xl">
+      {capacidades.titulo}
+    </h2>
+
+    <div class="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {capacidades.items.map((cap) => (
+        <article class="koda-card">
+          <span class="koda-card-icon">
+            <Icon name={cap.icono} class="h-6 w-6" />
+          </span>
+          <h3 class="koda-card-title mt-5 text-lg font-medium">{cap.titulo}</h3>
+          <p class="koda-card-desc mt-2 text-sm leading-relaxed">{cap.descripcion}</p>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .koda-caps {
+    --koda-ink: #0a0b0e;
+    --koda-panel: #101218;
+    --koda-text: #eef0f5;
+    --koda-muted: #9aa1ad;
+    --koda-accent: #5fe3cf;
+    background: var(--koda-ink);
+    color: var(--koda-text);
+  }
+  .koda-caps-title { color: var(--koda-text); }
+
+  .koda-card {
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, .06);
+    background: var(--koda-panel);
+    padding: 1.5rem;
+    transition: border-color .25s ease, transform .25s ease;
+  }
+  .koda-card:hover {
+    border-color: color-mix(in oklab, var(--koda-accent) 40%, transparent);
+    transform: translateY(-3px);
+  }
+  .koda-card-icon {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 44px; height: 44px; border-radius: 12px;
+    color: var(--koda-accent);
+    background: color-mix(in oklab, var(--koda-accent) 10%, transparent);
+  }
+  .koda-card-title { color: var(--koda-text); }
+  .koda-card-desc  { color: var(--koda-muted); }
+</style>

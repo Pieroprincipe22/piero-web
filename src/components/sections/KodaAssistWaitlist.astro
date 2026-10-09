@@ -1,0 +1,176 @@
+---
+// src/components/sections/KodaAssistWaitlist.astro
+import { kodaAssist } from "../../data/kodaAssist";
+const { waitlist } = kodaAssist;
+
+// Partimos el texto de consentimiento en torno al marcador {privacidad}
+// para insertar el enlace sin romper la frase.
+const [consentAntes, consentDespues] = waitlist.consentimiento.split("{privacidad}");
+---
+<section id="lista-espera" class="koda-wait">
+  <div class="mx-auto max-w-xl px-6 py-20 text-center sm:py-28">
+    <h2 class="koda-wait-title text-3xl font-semibold tracking-tight sm:text-4xl">
+      {waitlist.titulo}
+    </h2>
+    <p class="koda-wait-desc mt-4 leading-relaxed">
+      {waitlist.descripcion}
+    </p>
+
+    <form
+      id="koda-wait-form"
+      class="koda-wait-form mt-8 text-left"
+      data-ok={waitlist.mensajeExito}
+      data-err={waitlist.mensajeError}
+      novalidate
+    >
+      <label for="koda-wait-email" class="sr-only">Correo electrónico</label>
+      <div class="koda-wait-row">
+        <input
+          id="koda-wait-email"
+          name="email"
+          type="email"
+          inputmode="email"
+          autocomplete="email"
+          required
+          placeholder={waitlist.placeholderEmail}
+          class="koda-wait-input"
+        />
+        <button id="koda-wait-submit" type="submit" class="koda-wait-btn">
+          {waitlist.textoBoton}
+        </button>
+      </div>
+
+      <!-- Trampa anti-bots: invisible para personas; si se rellena, el servidor lo descarta. -->
+      <div class="koda-hp" aria-hidden="true">
+        <label for="koda-wait-company">No rellenar</label>
+        <input id="koda-wait-company" name="company" type="text" tabindex="-1" autocomplete="off" />
+      </div>
+
+      <label class="koda-wait-consent mt-4">
+        <input id="koda-wait-consent" name="consent" type="checkbox" required />
+        <span>
+          {consentAntes}
+          <a href={waitlist.privacidadUrl} class="koda-wait-link">{waitlist.privacidadTexto}</a>
+          {consentDespues}
+        </span>
+      </label>
+
+      <p id="koda-wait-status" class="koda-wait-status mt-4" role="status" aria-live="polite"></p>
+    </form>
+  </div>
+</section>
+
+<style>
+  .koda-wait {
+    --koda-ink: #0a0b0e;
+    --koda-panel: #101218;
+    --koda-text: #eef0f5;
+    --koda-muted: #9aa1ad;
+    --koda-accent: #5fe3cf;
+    --koda-error: #ff8a8a;
+    background: var(--koda-ink);
+    color: var(--koda-text);
+  }
+  .koda-wait-title { color: var(--koda-text); }
+  .koda-wait-desc  { color: var(--koda-muted); }
+
+  .koda-wait-row { display: flex; flex-direction: column; gap: .75rem; }
+  @media (min-width: 480px) { .koda-wait-row { flex-direction: row; } }
+
+  .koda-wait-input {
+    flex: 1;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, .12);
+    background: var(--koda-panel);
+    color: var(--koda-text);
+    padding: .85rem 1rem;
+    font-size: 1rem;
+  }
+  .koda-wait-input::placeholder { color: color-mix(in oklab, var(--koda-muted) 80%, transparent); }
+  .koda-wait-input:focus-visible {
+    outline: 2px solid var(--koda-accent);
+    outline-offset: 1px;
+    border-color: transparent;
+  }
+
+  .koda-wait-btn {
+    border-radius: 12px;
+    background: var(--koda-accent);
+    color: #06231f;
+    font-weight: 600;
+    padding: .85rem 1.5rem;
+    white-space: nowrap;
+    transition: transform .2s ease, opacity .2s ease;
+  }
+  .koda-wait-btn:hover { transform: translateY(-1px); }
+  .koda-wait-btn:focus-visible { outline: 2px solid var(--koda-text); outline-offset: 2px; }
+  .koda-wait-btn[disabled] { opacity: .6; cursor: not-allowed; transform: none; }
+
+  .koda-wait-consent {
+    display: flex; align-items: flex-start; gap: .6rem;
+    font-size: .85rem; line-height: 1.5;
+    color: var(--koda-muted);
+  }
+  .koda-wait-consent input { margin-top: .2rem; accent-color: var(--koda-accent); flex-shrink: 0; }
+  .koda-wait-link { color: var(--koda-accent); text-decoration: underline; }
+
+  .koda-wait-status { font-size: .9rem; min-height: 1.2em; }
+  .koda-wait-status[data-state="ok"]  { color: var(--koda-accent); }
+  .koda-wait-status[data-state="err"] { color: var(--koda-error); }
+
+  /* Honeypot: fuera de pantalla (sin display:none, para que los bots lo vean) */
+  .koda-hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+
+  .sr-only {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+  }
+</style>
+
+<script>
+  const form = document.getElementById("koda-wait-form") as HTMLFormElement | null;
+  const status = document.getElementById("koda-wait-status");
+  const submit = document.getElementById("koda-wait-submit") as HTMLButtonElement | null;
+
+  if (form && status && submit) {
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const email = (document.getElementById("koda-wait-email") as HTMLInputElement).value.trim();
+      const consent = (document.getElementById("koda-wait-consent") as HTMLInputElement).checked;
+      const company = (document.getElementById("koda-wait-company") as HTMLInputElement).value; // honeypot
+
+      if (!email || !consent) {
+        status.textContent = "Revisa tu correo y marca la casilla de consentimiento.";
+        status.setAttribute("data-state", "err");
+        return;
+      }
+
+      const textoOriginal = submit.textContent;
+      submit.disabled = true;
+      submit.textContent = "Enviando…";
+      status.textContent = "";
+      status.removeAttribute("data-state");
+
+      try {
+        const res = await fetch("/api/waitlist", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, consent, company, source: "koda-assist-waitlist" }),
+        });
+
+        if (!res.ok) throw new Error("bad status");
+
+        form.reset();
+        status.textContent = form.dataset.ok ?? "¡Listo! Te avisaremos muy pronto.";
+        status.setAttribute("data-state", "ok");
+        submit.textContent = "Hecho";
+      } catch {
+        status.textContent = form.dataset.err ?? "No hemos podido guardar tu correo. Inténtalo de nuevo.";
+        status.setAttribute("data-state", "err");
+        submit.disabled = false;
+        submit.textContent = textoOriginal;
+      }
+    });
+  }
+</script>

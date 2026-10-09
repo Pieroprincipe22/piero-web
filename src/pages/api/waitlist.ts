@@ -4,28 +4,26 @@ import { Resend } from 'resend';
 
 export const prerender = false;
 
-/** Describe nuestra tabla para que TypeScript conozca sus columnas. */
+/** Tabla leads con la columna nueva `source` y nombre/mensaje ya opcionales. */
 type Database = {
   public: {
     Tables: {
       leads: {
         Row: {
           id: string;
-          nombre: string;
+          nombre: string | null;
           email: string;
-          mensaje: string;
+          mensaje: string | null;
           ip_hash: string | null;
           source: string;
-          valoracion: number | null;
           created_at: string;
         };
         Insert: {
-          nombre: string;
           email: string;
-          mensaje: string;
           ip_hash?: string | null;
           source?: string;
-          valoracion?: number | null;
+          nombre?: string | null;
+          mensaje?: string | null;
         };
         Update: never;
         Relationships: [];
@@ -38,11 +36,12 @@ type Database = {
   };
 };
 
-// ── Ajustes anti-spam ────────────────────────────────────────
-const MAX_POR_IP = 3;          // máximo de mensajes...
-const VENTANA_MINUTOS = 10;    // ...cada 10 minutos
-const SEGUNDOS_MINIMOS = 3;    // rellenar más rápido que esto = bot
-const LIMITES = { nombre: 80, email: 120, mensaje: 2000 };
+// ── Ajustes ──────────────────────────────────────────────────
+const SOURCE = 'koda-assist-waitlist';
+const MAX_POR_IP = 3;         // máximo de altas...
+const VENTANA_MINUTOS = 10;   // ...cada 10 minutos
+const SEGUNDOS_MINIMOS = 3;   // rellenar más rápido = bot (time-trap opcional)
+const LIMITE_EMAIL = 120;
 
 const json = (data: unknown, status = 200) =>
   new Response(JSON.stringify(data), {
@@ -50,10 +49,10 @@ const json = (data: unknown, status = 200) =>
     headers: { 'Content-Type': 'application/json' },
   });
 
-// Respuesta "de mentira" para bots: creen que ha funcionado y no insisten.
+// Respuesta "de mentira" para bots: creen que funcionó y no insisten.
 const fingirOk = () => json({ ok: true });
 
-/** Hash de la IP: permite limitar por visitante SIN guardar su IP real (RGPD). */
+/** Hash de la IP: limita por visitante SIN guardar su IP real (RGPD). */
 async function hashIp(ip: string, salt: string): Promise<string> {
   const datos = new TextEncoder().encode(`${salt}:${ip}`);
   const buffer = await crypto.subtle.digest('SHA-256', datos);
@@ -66,14 +65,14 @@ async function hashIp(ip: string, salt: string): Promise<string> {
 export const POST: APIRoute = async ({ request, clientAddress }) => {
   const env = import.meta.env;
 
-  // 1) Solo aceptamos peticiones desde nuestra propia web.
+  // 1) Solo desde nuestra propia web.
   const origin = request.headers.get('origin');
   const host = request.headers.get('host');
   if (origin && host && !origin.includes(host)) {
     return json({ error: 'No autorizado' }, 403);
   }
 
-  // 2) El cuerpo debe ser JSON válido.
+  // 2) Cuerpo JSON válido.
   let body: Record<string, unknown>;
   try {
     body = await request.json();
@@ -82,46 +81,27 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
   }
 
   const texto = (v: unknown) => (typeof v === 'string' ? v.trim() : '');
-  const nombre = texto(body.nombre);
   const email = texto(body.email);
-  const mensaje = texto(body.mensaje);
-
-  // Las opiniones de la página /demo llegan con el prefijo "[Demo Koda".
-  const esDemo = mensaje.startsWith('[Demo Koda');
-
-  // Nota de 1 a 5 de la página /demo. Cualquier otra cosa se queda en "sin
-  // nota" en vez de dar error: una nota rara no debe hacer perder la opinión.
-  const nota = typeof body.valoracion === 'number' ? body.valoracion : Number.NaN;
-  const valoracion = esDemo && Number.isInteger(nota) && nota >= 1 && nota <= 5 ? nota : null;
+  const consent = body.consent === true;
 
   // 3) Honeypot: campo invisible que solo rellenan los bots.
-  if (texto(body.website)) return fingirOk();
+  if (texto(body.company)) return fingirOk();
 
-  // 4) Time-trap: nadie humano rellena un formulario en menos de 3 segundos.
+  // 4) Time-trap opcional: si el form manda `ts`, exigimos un mínimo de segundos.
   const cargadoEn = Number(body.ts);
   if (Number.isFinite(cargadoEn) && cargadoEn > 0) {
     const segundos = (Date.now() - cargadoEn) / 1000;
     if (segundos < SEGUNDOS_MINIMOS) return fingirOk();
   }
 
-  // 5) Validación de contenido.
-  if (!nombre || !email || !mensaje) {
-    return json({ error: 'Faltan campos obligatorios' }, 400);
-  }
-  if (
-    nombre.length > LIMITES.nombre ||
-    email.length > LIMITES.email ||
-    mensaje.length > LIMITES.mensaje
-  ) {
-    return json({ error: 'El mensaje es demasiado largo' }, 400);
-  }
+  // 5) Validación.
+  if (!email) return json({ error: 'Falta el correo' }, 400);
+  if (!consent) return json({ error: 'Falta el consentimiento' }, 400);
+  if (email.length > LIMITE_EMAIL) return json({ error: 'Correo demasiado largo' }, 400);
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return json({ error: 'Email no válido' }, 400);
   }
-  // Evita que inyecten cabeceras extra en el correo.
-  if (/[\r\n]/.test(nombre) || /[\r\n]/.test(email)) {
-    return json({ error: 'Datos no válidos' }, 400);
-  }
+  if (/[\r\n]/.test(email)) return json({ error: 'Datos no válidos' }, 400);
 
   // 6) Identificador anónimo del visitante.
   const ip =
@@ -141,8 +121,7 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
     supabase = createClient<Database>(env.SUPABASE_URL, env.SUPABASE_SERVICE_KEY);
   }
 
-  // 7) Límite de envíos por visitante.
-  //    Si la comprobación falla, dejamos pasar: mejor un spam que perder un cliente.
+  // 7) Límite por visitante, contando solo altas de la lista de espera.
   if (supabase && ipHash) {
     try {
       const desde = new Date(Date.now() - VENTANA_MINUTOS * 60_000).toISOString();
@@ -150,11 +129,12 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
         .from('leads')
         .select('id', { count: 'exact', head: true })
         .eq('ip_hash', ipHash)
+        .eq('source', SOURCE)
         .gte('created_at', desde);
 
       if (!error && typeof count === 'number' && count >= MAX_POR_IP) {
         return json(
-          { error: 'Has enviado varios mensajes seguidos. Inténtalo de nuevo en unos minutos.' },
+          { error: 'Ya te has apuntado hace un momento. Inténtalo más tarde si hace falta.' },
           429
         );
       }
@@ -166,19 +146,12 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
   let guardado = false;
   let avisado = false;
 
-  // 8) Guardar en Supabase.
+  // 8) Guardar en Supabase (nombre/mensaje van vacíos; el origen lo marca `source`).
   if (supabase) {
     try {
       const { error } = await supabase
         .from('leads')
-        .insert({
-          nombre,
-          email,
-          mensaje,
-          ip_hash: ipHash,
-          source: esDemo ? 'demo' : 'contact',
-          valoracion,
-        });
+        .insert({ email, ip_hash: ipHash, source: SOURCE });
       if (!error) guardado = true;
       else console.error('Supabase insert falló');
     } catch {
@@ -186,30 +159,25 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
     }
   }
 
-  // 9) Avisar por email. La nota, si la hay, sale ya en el asunto.
+  // 9) Avisarte por email de cada alta.
   if (env.RESEND_API_KEY && env.MAIL_FROM && env.MAIL_TO) {
     try {
       const resend = new Resend(env.RESEND_API_KEY);
-      // Ojo: Resend NO lanza un error cuando falla; lo devuelve en `error`.
-      const { error } = await resend.emails.send({
+      await resend.emails.send({
         from: env.MAIL_FROM,
         to: env.MAIL_TO,
         replyTo: email,
-        subject: esDemo
-          ? `Opinión de la demo de Koda — ${nombre}${valoracion ? ` (${valoracion}/5)` : ''}`
-          : `Nuevo cliente desde la web — ${nombre}`,
-        text: `Nombre: ${nombre}\nEmail: ${email}\n\nMensaje:\n${mensaje}`,
+        subject: 'Nueva alta en la lista de espera — Koda Assist',
+        text: `Nuevo interesado en Koda Assist:\n\nEmail: ${email}`,
       });
-      if (!error) avisado = true;
-      else console.error('Resend rechazó el envío');
+      avisado = true;
     } catch {
       console.error('Resend no disponible');
     }
   }
 
   if (!guardado && !avisado) {
-    // Mensaje genérico: nunca exponemos el motivo real al visitante.
-    return json({ error: 'No se pudo enviar el mensaje. Inténtalo más tarde.' }, 500);
+    return json({ error: 'No se pudo completar el alta. Inténtalo más tarde.' }, 500);
   }
 
   return json({ ok: true });

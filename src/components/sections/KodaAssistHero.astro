@@ -1,0 +1,103 @@
+---
+// src/components/sections/KodaAssistHero.astro
+import { kodaAssist } from "../../data/kodaAssist";
+const { hero } = kodaAssist;
+---
+<section class="koda-hero relative overflow-hidden">
+  <div class="relative z-10 mx-auto flex max-w-5xl flex-col items-center px-6 pt-28 pb-20 text-center sm:pt-36 sm:pb-28">
+    <span class="koda-badge mb-8 inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-sm font-medium tracking-wide">
+      <span class="koda-badge-dot" aria-hidden="true"></span>
+      {hero.badge}
+    </span>
+
+    <h1 class="koda-display text-5xl font-semibold leading-[1.05] tracking-tight sm:text-7xl">
+      {hero.titulo}
+    </h1>
+
+    <p class="koda-subtitle mt-6 max-w-2xl text-balance text-lg leading-relaxed sm:text-xl">
+      {hero.subtitulo}
+    </p>
+
+    <a href="#lista-espera" class="koda-cta mt-10 inline-flex items-center justify-center rounded-full px-7 py-3 text-base font-medium">
+      Apuntarme a la lista
+    </a>
+
+    <!-- Señal "a la escucha". Sustituye este bloque por un GIF/vídeo real del asistente cuando lo tengas. -->
+    <div class="koda-ring-wrap mt-16" aria-hidden="true">
+      <div class="koda-ring koda-ring-1"></div>
+      <div class="koda-ring koda-ring-2"></div>
+      <div class="koda-ring koda-ring-3"></div>
+      <div class="koda-core"></div>
+    </div>
+  </div>
+
+  <div class="koda-glow" aria-hidden="true"></div>
+</section>
+
+<style>
+  .koda-hero {
+    --koda-ink: #0a0b0e;
+    --koda-text: #eef0f5;
+    --koda-muted: #9aa1ad;
+    --koda-accent: #5fe3cf; /* acento sereno "a la escucha" — cámbialo a tu marca */
+    background: var(--koda-ink);
+    color: var(--koda-text);
+  }
+  .koda-subtitle { color: var(--koda-muted); }
+  .koda-display { color: var(--koda-text); }
+
+  .koda-badge {
+    border-color: color-mix(in oklab, var(--koda-accent) 40%, transparent);
+    color: var(--koda-accent);
+    background: color-mix(in oklab, var(--koda-accent) 8%, transparent);
+  }
+  .koda-badge-dot {
+    width: 7px; height: 7px; border-radius: 9999px;
+    background: var(--koda-accent);
+    animation: koda-pulse 2.4s ease-out infinite;
+  }
+
+  .koda-cta {
+    background: var(--koda-text);
+    color: var(--koda-ink);
+    transition: transform .2s ease, box-shadow .2s ease;
+  }
+  .koda-cta:hover { transform: translateY(-2px); box-shadow: 0 12px 40px -12px color-mix(in oklab, var(--koda-accent) 60%, transparent); }
+  .koda-cta:focus-visible { outline: 2px solid var(--koda-accent); outline-offset: 3px; }
+
+  .koda-ring-wrap { position: relative; width: 220px; height: 220px; }
+  .koda-ring {
+    position: absolute; inset: 0; margin: auto; border-radius: 9999px;
+    border: 1px solid color-mix(in oklab, var(--koda-accent) 35%, transparent);
+    animation: koda-breathe 4s ease-in-out infinite;
+  }
+  .koda-ring-1 { width: 220px; height: 220px; }
+  .koda-ring-2 { width: 150px; height: 150px; animation-delay: .5s; }
+  .koda-ring-3 { width: 90px;  height: 90px;  animation-delay: 1s; }
+  .koda-core {
+    position: absolute; inset: 0; margin: auto;
+    width: 46px; height: 46px; border-radius: 9999px;
+    background: radial-gradient(circle, var(--koda-accent), color-mix(in oklab, var(--koda-accent) 20%, transparent));
+    box-shadow: 0 0 40px 0 color-mix(in oklab, var(--koda-accent) 55%, transparent);
+  }
+
+  .koda-glow {
+    position: absolute; left: 50%; top: 42%; transform: translate(-50%, -50%);
+    width: 700px; height: 700px; pointer-events: none;
+    background: radial-gradient(circle, color-mix(in oklab, var(--koda-accent) 16%, transparent), transparent 60%);
+    filter: blur(20px);
+  }
+
+  @keyframes koda-pulse {
+    0%   { box-shadow: 0 0 0 0 color-mix(in oklab, var(--koda-accent) 60%, transparent); }
+    70%  { box-shadow: 0 0 0 10px transparent; }
+    100% { box-shadow: 0 0 0 0 transparent; }
+  }
+  @keyframes koda-breathe {
+    0%, 100% { transform: scale(1);    opacity: .7; }
+    50%      { transform: scale(1.06); opacity: 1; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .koda-badge-dot, .koda-ring { animation: none; }
+  }
+</style>

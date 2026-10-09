@@ -111,8 +111,8 @@ export const prerender = false;
           <span class="eyebrow">Tu opinión</span>
           <h2>¿Qué tal te ha ido?</h2>
           <p class="lead">
-            Rellena lo que quieras: con una sola respuesta ya me ayudas. Si algo falló, cuéntame qué
-            hiciste justo antes.
+            Rellena lo que quieras: con la nota o con una sola respuesta ya me ayudas. Si algo
+            falló, cuéntame qué hiciste justo antes.
           </p>
         </div>
 
@@ -129,6 +129,25 @@ export const prerender = false;
             <label for="fb-e">Email</label>
             <input id="fb-e" name="email" type="email" placeholder="tu@email.com" maxlength="120" required />
           </div>
+          <!-- Nota de 1 a 5. Son cinco botones de opción normales, con la estrella
+               dibujada encima: funcionan con ratón, con el dedo y con el teclado. -->
+          <fieldset class="stars">
+            <legend>{demo.valoracion.label}</legend>
+            <div class="stars__row">
+              {
+                demo.valoracion.textos.map((texto, i) => (
+                  <label class="star" title={texto}>
+                    <input type="radio" name="valoracion" value={i + 1} data-texto={texto} />
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M12 2.8l2.85 5.78 6.38.93-4.62 4.5 1.09 6.35L12 17.36l-5.7 3 1.09-6.35-4.62-4.5 6.38-.93z" />
+                    </svg>
+                    <span class="sr">{i + 1} de 5: {texto}</span>
+                  </label>
+                ))
+              }
+              <span class="stars__txt" id="fbStarsTxt" aria-hidden="true">{demo.valoracion.sinNota}</span>
+            </div>
+          </fieldset>
           {
             demo.preguntas.map((p) => (
               <div class="field">
@@ -215,6 +234,46 @@ export const prerender = false;
 
   /* Tres preguntas: textareas más bajas que las del formulario de contacto */
   #feedbackForm textarea { min-height: 84px; }
+
+  /* ── Nota de 1 a 5 estrellas ── */
+  .stars { border: 0; min-width: 0; }
+  /* Mismo aspecto que las etiquetas de los demás campos (.field label). */
+  .stars legend {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #8b93a7;
+    margin-bottom: 7px;
+  }
+  .stars__row { display: flex; align-items: center; flex-wrap: wrap; gap: 4px; }
+  .star { position: relative; display: block; padding: 4px; cursor: pointer; line-height: 0; }
+  /* El botón de opción sigue ahí (para el teclado y los lectores de pantalla),
+     pero invisible y ocupando toda la estrella. */
+  .star input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+  .star svg {
+    width: 34px;
+    height: 34px;
+    fill: transparent;
+    stroke: #4a5263;
+    stroke-width: 1.5;
+    stroke-linejoin: round;
+    border-radius: 8px;
+    transition: fill 0.15s, stroke 0.15s, transform 0.15s var(--ease);
+  }
+  .star:hover svg { stroke: var(--signal); transform: scale(1.1); }
+  .star.is-on svg { fill: var(--signal); stroke: var(--signal); }
+  .star input:focus-visible + svg { outline: 2px solid #8f9bff; outline-offset: 2px; }
+  .stars__txt { margin-left: 10px; font-size: 0.9rem; color: #8b93a7; }
+  /* Texto solo para lectores de pantalla. */
+  .sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
 </style>
 
 <script>
@@ -222,6 +281,27 @@ export const prerender = false;
   const msg = document.getElementById('fbMsg');
   const btn = document.getElementById('fbBtn') as HTMLButtonElement | null;
   const cargadoEn = Date.now();
+
+  // ── Estrellas: se pintan todas las que van hasta la elegida ──
+  const estrellas = Array.from(
+    form?.querySelectorAll<HTMLInputElement>('input[name="valoracion"]') ?? []
+  );
+  const textoNota = document.getElementById('fbStarsTxt');
+  const sinNota = textoNota?.textContent ?? '';
+
+  function pintarEstrellas() {
+    const elegida = estrellas.find((e) => e.checked);
+    const nota = elegida ? Number(elegida.value) : 0;
+    estrellas.forEach((e) => {
+      e.closest('.star')?.classList.toggle('is-on', Number(e.value) <= nota);
+    });
+    if (textoNota) {
+      textoNota.textContent = elegida ? `${nota} de 5 · ${elegida.dataset.texto}` : sinNota;
+    }
+  }
+  estrellas.forEach((e) => e.addEventListener('change', pintarEstrellas));
+  // Al recargar, algunos navegadores recuerdan la estrella marcada.
+  pintarEstrellas();
 
   form?.addEventListener('submit', async (ev) => {
     ev.preventDefault();
@@ -235,19 +315,28 @@ export const prerender = false;
       const valor = t.value.trim();
       if (valor) bloques.push(`${t.dataset.pregunta}\n${valor}`);
     });
-    if (bloques.length === 0) {
-      msg.textContent = 'Responde al menos una de las tres preguntas.';
+    const datos = new FormData(form);
+    // 0 = no ha puesto nota. La nota sola ya vale como opinión.
+    const nota = Number(datos.get('valoracion') ?? 0);
+    if (bloques.length === 0 && !nota) {
+      msg.textContent = 'Pon una nota o responde al menos una de las tres preguntas.';
       msg.classList.add('form__msg--err');
       return;
     }
 
-    const datos = new FormData(form);
+    // La nota va también escrita en el mensaje: así se lee en el correo de aviso.
+    const partes = [`[Demo Koda ${form.dataset.version}]`];
+    if (nota) partes.push(`Valoración: ${nota} de 5`);
+    partes.push(...bloques);
+
     const cuerpo = {
       nombre: String(datos.get('nombre') ?? ''),
       email: String(datos.get('email') ?? ''),
       website: String(datos.get('website') ?? ''),
       // El prefijo permite a /api/contact distinguirlo de un cliente.
-      mensaje: `[Demo Koda ${form.dataset.version}]\n\n${bloques.join('\n\n')}`,
+      mensaje: partes.join('\n\n'),
+      // La nota, aparte, para guardarla en su propia columna de Supabase.
+      valoracion: nota || null,
       ts: String(cargadoEn),
     };
 
@@ -263,6 +352,7 @@ export const prerender = false;
       const resultado = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(resultado.error || 'error');
       form.reset();
+      pintarEstrellas();
       msg.textContent = '¡Gracias! Me ha llegado tu opinión.';
       msg.classList.add('form__msg--ok');
     } catch (e) {

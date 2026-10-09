@@ -1,0 +1,75 @@
+---
+// src/pages/privacidad.astro
+import BaseLayout from "../layouts/BaseLayout.astro";
+const actualizado = "8 de agosto de 2026";
+---
+<BaseLayout
+  title="Política de privacidad — Koda Estudio"
+  description="Cómo trata Koda Estudio los datos que nos facilitas a través de la web."
+>
+  <main class="mx-auto max-w-3xl px-6 py-20 leading-relaxed">
+    <h1 class="text-3xl font-semibold tracking-tight">Política de privacidad</h1>
+    <p class="mt-2 text-sm opacity-70">Última actualización: {actualizado}</p>
+
+    <h2 class="mt-10 text-xl font-medium">Responsable</h2>
+    <p class="mt-3">
+      Responsable del tratamiento: [Nombre o razón social] («Koda Estudio»).
+      Contacto: <a href="mailto:hola@kodaestudio.com">hola@kodaestudio.com</a>.
+      [NIF, si procede.]
+    </p>
+
+    <h2 class="mt-8 text-xl font-medium">Qué datos recogemos y con qué fin</h2>
+    <p class="mt-3">
+      Recogemos únicamente lo que nos facilitas al rellenar nuestros formularios:
+    </p>
+    <ul class="mt-3 list-disc pl-6">
+      <li>
+        <strong>Formulario de contacto:</strong> nombre, correo electrónico y el
+        mensaje que escribas, con el fin de responder a tu consulta.
+      </li>
+      <li>
+        <strong>Lista de espera de Koda Assist:</strong> tu correo electrónico,
+        con el único fin de avisarte cuando el producto esté disponible.
+      </li>
+    </ul>
+    <p class="mt-3">
+      Además, guardamos una versión cifrada (hash) de tu dirección IP para
+      prevenir abusos y envíos automatizados. No conservamos tu IP real.
+    </p>
+
+    <h2 class="mt-8 text-xl font-medium">Base legal</h2>
+    <p class="mt-3">
+      Tratamos tus datos con base en tu consentimiento, que otorgas al marcar la
+      casilla correspondiente y enviar el formulario. Puedes retirarlo en
+      cualquier momento escribiéndonos.
+    </p>
+
+    <h2 class="mt-8 text-xl font-medium">Con quién los compartimos</h2>
+    <p class="mt-3">
+      No vendemos ni cedemos tus datos. Nos apoyamos en proveedores que actúan
+      como encargados del tratamiento para prestar el servicio:
+    </p>
+    <ul class="mt-3 list-disc pl-6">
+      <li>Supabase (almacenamiento de los datos del formulario).</li>
+      <li>Resend (envío de las notificaciones por correo).</li>
+      <li>Vercel (alojamiento de la web).</li>
+    </ul>
+
+    <h2 class="mt-8 text-xl font-medium">Cuánto tiempo los conservamos</h2>
+    <p class="mt-3">
+      Conservamos tus datos el tiempo necesario para atender tu consulta o
+      avisarte sobre Koda Assist, y los eliminamos cuando dejan de ser
+      necesarios o cuando nos pides que lo hagamos.
+    </p>
+
+    <h2 class="mt-8 text-xl font-medium">Tus derechos</h2>
+    <p class="mt-3">
+      Puedes acceder a tus datos, rectificarlos, suprimirlos, oponerte a su
+      tratamiento o solicitar su portabilidad escribiendo a
+      <a href="mailto:hola@kodaestudio.com">hola@kodaestudio.com</a>. También
+      puedes reclamar ante la Agencia Española de Protección de Datos
+      (<a href="https://www.aepd.es" rel="noopener" target="_blank">aepd.es</a>)
+      si consideras que no hemos tratado tus datos correctamente.
+    </p>
+  </main>
+</BaseLayout>

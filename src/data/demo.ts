@@ -146,6 +146,15 @@ export const demo = {
     },
   ],
 
+  // Nota de 1 a 5 estrellas, encima de las preguntas del formulario.
+  // `textos` es lo que se lee al elegir cada estrella, de la 1 a la 5:
+  // tienen que ser cinco. `sinNota` es lo que pone antes de elegir.
+  valoracion: {
+    label: '¿Qué nota le pones a Koda?',
+    sinNota: 'Sin nota todavía',
+    textos: ['Muy mal', 'Mal', 'Normal', 'Bien', 'Muy bien'],
+  },
+
   // Preguntas del formulario de opinión (se envían por el mismo
   // sistema que el formulario de contacto: Supabase + email).
   preguntas: [

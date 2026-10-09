@@ -2,7 +2,7 @@
 --  Tabla `leads`: guarda los mensajes del formulario de contacto
 --  y las opiniones de la página /demo.
 --
---  Refleja la tabla real del proyecto (revisada el 6/10/2026).
+--  Refleja la tabla real del proyecto (revisada el 9/10/2026).
 --  Se puede ejecutar varias veces: no borra ni cambia datos.
 --  Supabase → SQL Editor → New query → Run.
 -- ============================================================
@@ -14,12 +14,19 @@ create table if not exists public.leads (
   mensaje     text,
   created_at  timestamptz not null default now(),
   ip_hash     text,                             -- visitante anónimo (límite anti-spam)
-  source      text not null default 'contact'   -- de qué formulario viene
+  source      text not null default 'contact',  -- de qué formulario viene: 'contact' o 'demo'
+  valoracion  smallint                          -- nota de 1 a 5 de /demo (vacío = sin nota)
 );
 
 -- Por si la tabla se creó con una versión antigua de este archivo.
 alter table public.leads add column if not exists ip_hash text;
 alter table public.leads add column if not exists source text not null default 'contact';
+alter table public.leads add column if not exists valoracion smallint;
+
+-- La nota solo puede ser un número del 1 al 5 (o estar vacía).
+alter table public.leads drop constraint if exists leads_valoracion_rango;
+alter table public.leads add constraint leads_valoracion_rango
+  check (valoracion is null or valoracion between 1 and 5);
 
 -- Índices: el límite de envíos busca por ip_hash + fecha.
 create index if not exists leads_ip_hash_created_at_idx on public.leads (ip_hash, created_at desc);

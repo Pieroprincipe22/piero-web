@@ -1,0 +1,22 @@
+---
+// src/pages/koda-assist.astro
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { kodaAssist } from "../data/kodaAssist";
+import KodaAssistHero from "../components/sections/KodaAssistHero.astro";
+import KodaAssistCapacidades from "../components/sections/KodaAssistCapacidades.astro";
+import KodaAssistPublico from "../components/sections/KodaAssistPublico.astro";
+import KodaAssistWaitlist from "../components/sections/KodaAssistWaitlist.astro";
+
+const { seo } = kodaAssist;
+---
+<BaseLayout
+  title={seo.title}
+  description={seo.description}
+  canonical={seo.canonical}
+  ogImage={seo.ogImage}
+>
+  <KodaAssistHero />
+  <KodaAssistCapacidades />
+  <KodaAssistPublico />
+  <KodaAssistWaitlist />
+</BaseLayout>

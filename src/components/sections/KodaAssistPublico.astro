@@ -1,0 +1,42 @@
+---
+// src/components/sections/KodaAssistPublico.astro
+import { kodaAssist } from "../../data/kodaAssist";
+const { publico } = kodaAssist;
+---
+<section class="koda-publico">
+  <div class="mx-auto max-w-5xl px-6 py-20 sm:py-24">
+    <h2 class="koda-publico-title text-3xl font-semibold tracking-tight sm:text-4xl">
+      {publico.titulo}
+    </h2>
+
+    <div class="mt-10 grid gap-4 sm:grid-cols-2">
+      {publico.items.map((item) => (
+        <article class="koda-publico-card">
+          <h3 class="koda-publico-card-title text-xl font-medium">{item.titulo}</h3>
+          <p class="koda-publico-card-desc mt-3 leading-relaxed">{item.descripcion}</p>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .koda-publico {
+    --koda-ink: #0a0b0e;
+    --koda-panel: #101218;
+    --koda-text: #eef0f5;
+    --koda-muted: #9aa1ad;
+    --koda-accent: #5fe3cf;
+    background: var(--koda-ink);
+    color: var(--koda-text);
+  }
+  .koda-publico-title { color: var(--koda-text); }
+  .koda-publico-card {
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, .06);
+    background: linear-gradient(180deg, var(--koda-panel), color-mix(in oklab, var(--koda-panel) 92%, black));
+    padding: 2rem;
+  }
+  .koda-publico-card-title { color: var(--koda-text); }
+  .koda-publico-card-desc  { color: var(--koda-muted); }
+</style>
