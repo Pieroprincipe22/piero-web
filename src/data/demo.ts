@@ -5,7 +5,7 @@
 // ============================================================
 
 export const demo = {
-  version: 'v0.15.1',
+  version: 'v0.16.0',
 
   // Enlace directo al .zip del último Release del repo público `koda-demo`.
   // Si el archivo del Release se llama SIEMPRE `Koda-demo.zip`, este enlace
@@ -14,7 +14,9 @@ export const demo = {
     'https://github.com/Pieroprincipe22/koda-demo/releases/latest/download/Koda-demo.zip',
 
   tamano: '719 MB', // Tamaño del .zip. Vacío = no se muestra.
-  sistema: 'Windows 10 u 11', // ← COMPRUEBA en un PC limpio antes de publicarlo
+  // Windows 11: comprobado en un PC limpio el 11 de octubre de 2026.
+  // Windows 10: sigue SIN comprobar.
+  sistema: 'Windows 10 u 11',
 
   requisitos: ['Micrófono y altavoces o cascos', 'Conexión a internet'],
 
@@ -33,12 +35,12 @@ export const demo = {
     {
       titulo: 'Ábrelo',
       texto:
-        'Abre Koda.exe. Windows avisará de que es una app desconocida: pulsa «Más información» y después «Ejecutar de todas formas».',
+        'Abre Koda.exe. Windows avisará de que es una app desconocida: pulsa «Más información» y después «Ejecutar de todas formas». Si en su lugar sale un aviso del «Control inteligente de aplicaciones», sin botón para continuar, no cambies nada en tu equipo y escríbeme.',
     },
     {
       titulo: 'Háblale',
       texto:
-        'Acepta el permiso del micrófono si Windows lo pide y prueba: hazle una pregunta, pídele la hora o que abra un programa.',
+        'La primera vez, Koda se presenta y te pregunta cómo quieres que te llame. Después acepta el permiso del micrófono si Windows lo pide y prueba: di «Koda», hazle una pregunta, pídele la hora o que abra un programa.',
     },
   ],
 
@@ -55,12 +57,13 @@ export const demo = {
       {
         id: 'nombre',
         corto: 'Tu nombre',
-        titulo: 'Dile cómo llamarte',
-        texto: 'Koda te habla de usted y por tu nombre. Díselo el primer día.',
+        titulo: 'Cambia cómo te llama',
+        texto:
+          'La primera vez que la abres, Koda te pregunta cómo llamarte. Si después quieres cambiar el nombre, el trato o tu cumpleaños, se hace aquí.',
         pasos: [
           'Pulsa «Configuración», en el menú de la izquierda.',
           'Quédate en la pestaña «General».',
-          'Escribe tu nombre en «Su nombre» y pulsa Intro.',
+          'En «Su perfil», cambia tu nombre y pulsa Intro.',
         ],
         prueba: '',
         nota: '',
