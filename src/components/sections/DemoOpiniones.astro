@@ -1,0 +1,220 @@
+---
+// Apartado «Opiniones» de la página /demo: lo que han escrito, para publicar,
+// quienes ya han probado Koda. A la izquierda el resumen (nota media y cuántas
+// hay de cada nota); a la derecha la lista, de la más nueva a la más antigua.
+//
+// Las opiniones las pide el SERVIDOR a Supabase en cada visita. Al navegador
+// solo llegan el alias, el texto público, la nota, la versión y la fecha:
+// nunca el email ni las respuestas privadas.
+//
+// Si no hay ninguna publicada, o Supabase no responde, este apartado no pinta
+// nada: la página se ve como si no existiera.
+import { createClient } from '@supabase/supabase-js';
+import { demo } from '../../data/demo';
+
+type Opinion = {
+  alias_publico: string | null;
+  opinion_publica: string;
+  valoracion: number | null;
+  version: string | null;
+  created_at: string;
+};
+
+const t = demo.opiniones;
+const ESTRELLA =
+  'M12 2.8l2.85 5.78 6.38.93-4.62 4.5 1.09 6.35L12 17.36l-5.7 3 1.09-6.35-4.62-4.5 6.38-.93z';
+
+// ── 1) Pedir a Supabase las opiniones publicadas ──
+const env = import.meta.env;
+let opiniones: Opinion[] = [];
+if (env.SUPABASE_URL && env.SUPABASE_SERVICE_KEY) {
+  try {
+    const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_KEY);
+    const { data, error } = await supabase
+      .from('leads')
+      .select('alias_publico, opinion_publica, valoracion, version, created_at')
+      .eq('source', 'demo')
+      .eq('publicada', true)
+      .not('opinion_publica', 'is', null)
+      .order('created_at', { ascending: false })
+      .limit(200)
+      // Si Supabase falla o tarda más de 3 segundos, seguimos sin opiniones:
+      // nada de reintentos, que harían esperar a quien abre la página.
+      .abortSignal(AbortSignal.timeout(3000))
+      .retry(false);
+    if (!error && data) opiniones = data as Opinion[];
+    else console.error('No se pudieron leer las opiniones');
+  } catch {
+    console.error('Supabase no disponible para las opiniones');
+  }
+}
+
+// ── 2) Resumen: nota media y cuántas hay de cada nota ──
+const notas = opiniones.map((o) => o.valoracion).filter((n): n is number => n !== null);
+const media = notas.length ? notas.reduce((a, b) => a + b, 0) / notas.length : 0;
+const mediaTexto = media.toFixed(1).replace('.', ',');
+const filas = [5, 4, 3, 2, 1].map((n) => ({ n, cuantas: notas.filter((x) => x === n).length }));
+
+// ── 3) Lo que se enseña en la lista ──
+const visibles = opiniones.slice(0, t.maximo);
+const fecha = new Intl.DateTimeFormat('es-ES', {
+  day: 'numeric',
+  month: 'short',
+  year: 'numeric',
+  timeZone: 'Europe/Madrid',
+});
+const total = opiniones.length;
+---
+
+{
+  total > 0 && (
+    <section class="section opis" id="opiniones">
+      <div class="wrap opis__grid">
+        <aside class="opis__res">
+          <span class="eyebrow">{t.etiqueta}</span>
+          <h2 class="sr">{t.titulo}</h2>
+          {notas.length > 0 && (
+            <>
+              <p class="opis__media">{mediaTexto}</p>
+              <span class="est est--lg" role="img" aria-label={`Nota media: ${mediaTexto} de 5`}>
+                {[1, 2, 3, 4, 5].map((n) => (
+                  <svg viewBox="0 0 24 24" class={n <= Math.round(media) ? '' : 'off'} aria-hidden="true">
+                    <path d={ESTRELLA} />
+                  </svg>
+                ))}
+              </span>
+            </>
+          )}
+          <p class="opis__n">{total === 1 ? '1 opinión' : `${total} opiniones`}</p>
+          {notas.length > 0 && (
+            <div class="opis__barras" aria-hidden="true">
+              {filas.map((f) => (
+                <div class="opis__fila">
+                  <span>{f.n}</span>
+                  <div class="opis__barra">
+                    <i style={`width:${(f.cuantas / notas.length) * 100}%`} />
+                  </div>
+                  <span>{f.cuantas}</span>
+                </div>
+              ))}
+            </div>
+          )}
+          <a href="#opinion" class="opis__enlace">{t.enlace}</a>
+        </aside>
+
+        <div class="opis__lista">
+          {visibles.map((o) => (
+            <article class="opis__item">
+              <div class="opis__cab">
+                <b>{o.alias_publico || 'Anónimo'}</b>
+                {o.valoracion && (
+                  <span class="est" role="img" aria-label={`${o.valoracion} de 5`}>
+                    {[1, 2, 3, 4, 5].map((n) => (
+                      <svg viewBox="0 0 24 24" class={n <= (o.valoracion ?? 0) ? '' : 'off'} aria-hidden="true">
+                        <path d={ESTRELLA} />
+                      </svg>
+                    ))}
+                  </span>
+                )}
+                <span class="opis__meta">
+                  {[o.version, fecha.format(new Date(o.created_at))].filter(Boolean).join(' · ')}
+                </span>
+              </div>
+              <p>{o.opinion_publica}</p>
+            </article>
+          ))}
+          {total > visibles.length && (
+            <p class="opis__mas">Se muestran las {visibles.length} más recientes de {total}.</p>
+          )}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+<style>
+  /* El bloque de arriba (la descarga) ya deja su propio hueco debajo. */
+  .opis { padding-top: 0; }
+
+  .opis__grid { display: grid; grid-template-columns: 260px 1fr; gap: 56px; align-items: start; }
+
+  /* ── Tarjeta del resumen ── */
+  .opis__res {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--r);
+    padding: 26px;
+  }
+  .opis__media {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 3.4rem;
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    margin: 14px 0 8px;
+  }
+  .opis__n { color: var(--muted); font-size: 0.92rem; margin: 6px 0 18px; }
+  .opis__fila {
+    display: grid;
+    grid-template-columns: 12px 1fr 14px;
+    gap: 10px;
+    align-items: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--muted);
+    margin-top: 7px;
+  }
+  .opis__barra { height: 6px; border-radius: 99px; background: var(--line); overflow: hidden; }
+  .opis__barra i { display: block; height: 100%; background: var(--signal); border-radius: 99px; }
+  .opis__enlace {
+    display: inline-block;
+    margin-top: 22px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 500;
+    font-size: 0.95rem;
+    color: var(--brand);
+  }
+  .opis__enlace:hover { text-decoration: underline; }
+
+  /* ── Estrellas (solo se miran, no se pulsan) ── */
+  .est { display: inline-flex; gap: 2px; vertical-align: middle; }
+  .est svg {
+    width: 18px;
+    height: 18px;
+    fill: var(--signal);
+    stroke: var(--signal);
+    stroke-width: 1.5;
+    stroke-linejoin: round;
+  }
+  .est svg.off { fill: transparent; stroke: #c3c9d4; }
+  .est--lg svg { width: 22px; height: 22px; }
+
+  /* ── Lista de opiniones ── */
+  .opis__item { padding: 22px 0; border-bottom: 1px solid var(--line); }
+  .opis__item:first-child { padding-top: 4px; }
+  .opis__cab { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; flex-wrap: wrap; }
+  .opis__cab b { font-family: 'Space Grotesk', sans-serif; font-size: 1.05rem; overflow-wrap: anywhere; }
+  .opis__meta {
+    margin-left: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--muted);
+  }
+  /* overflow-wrap: una palabra larguísima no rompe el diseño en el móvil. */
+  .opis__item p { color: var(--ink); font-size: 1.02rem; max-width: 44rem; overflow-wrap: anywhere; }
+  .opis__mas { margin-top: 18px; color: var(--muted); font-size: 0.9rem; }
+
+  /* Texto solo para lectores de pantalla. */
+  .sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  @media (max-width: 860px) {
+    .opis__grid { grid-template-columns: 1fr; gap: 28px; }
+  }
+</style>

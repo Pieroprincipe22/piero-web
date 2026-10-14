@@ -4,6 +4,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Footer from '../components/layout/Footer.astro';
 import DemoGuia from '../components/sections/DemoGuia.astro';
+import DemoOpiniones from '../components/sections/DemoOpiniones.astro';
 import { site } from '../data/site';
 import { demo } from '../data/demo';
 
@@ -59,6 +60,10 @@ export const prerender = false;
         </div>
       </div>
     </section>
+
+    <!-- ───────── Opiniones de otros probadores ─────────
+         Si todavía no hay ninguna publicada, no pinta nada. -->
+    <DemoOpiniones />
 
     <!-- ───────── Instalación ───────── -->
     <section class="section proceso" id="instalar">
@@ -163,6 +168,33 @@ export const prerender = false;
               </div>
             ))
           }
+          <!-- Opinión para publicar (opcional). Es lo único del formulario que
+               se enseña en la página, arriba, en el apartado «Opiniones». -->
+          <div class="pub">
+            <p class="pub__sep">{demo.opiniones.form.separador}</p>
+            <div class="field">
+              <label for="fb-publica">{demo.opiniones.form.label}</label>
+              <textarea
+                id="fb-publica"
+                name="opinionPublica"
+                placeholder={demo.opiniones.form.placeholder}
+                maxlength="300"
+                rows="3"
+              ></textarea>
+            </div>
+            <div class="field">
+              <label for="fb-alias">{demo.opiniones.form.aliasLabel}</label>
+              <input
+                id="fb-alias"
+                name="alias"
+                type="text"
+                placeholder={demo.opiniones.form.aliasPlaceholder}
+                maxlength="40"
+                autocomplete="off"
+              />
+            </div>
+            <p class="pub__aviso">{demo.opiniones.form.aviso}</p>
+          </div>
           <button type="submit" class="btn btn--signal" id="fbBtn">Enviar opinión →</button>
           <p class="form__msg" id="fbMsg" role="status" aria-live="polite"></p>
         </form>
@@ -234,6 +266,17 @@ export const prerender = false;
 
   /* Tres preguntas: textareas más bajas que las del formulario de contacto */
   #feedbackForm textarea { min-height: 84px; }
+
+  /* ── Bloque «para publicar»: separado del resto por una línea ── */
+  .pub { display: grid; gap: 16px; margin-top: 6px; padding-top: 20px; border-top: 1px solid #262b36; }
+  .pub__sep {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--signal);
+  }
+  .pub__aviso { font-size: 0.85rem; line-height: 1.5; color: #8b93a7; }
 
   /* ── Nota de 1 a 5 estrellas ── */
   .stars { border: 0; min-width: 0; }
@@ -318,8 +361,16 @@ export const prerender = false;
     const datos = new FormData(form);
     // 0 = no ha puesto nota. La nota sola ya vale como opinión.
     const nota = Number(datos.get('valoracion') ?? 0);
-    if (bloques.length === 0 && !nota) {
-      msg.textContent = 'Pon una nota o responde al menos una de las tres preguntas.';
+    // Lo que ha escrito para publicar (vacío = no publica nada).
+    const opinionPublica = String(datos.get('opinionPublica') ?? '').trim();
+    if (bloques.length === 0 && !nota && !opinionPublica) {
+      msg.textContent = 'Pon una nota o responde al menos una de las preguntas.';
+      msg.classList.add('form__msg--err');
+      return;
+    }
+    // Una opinión publicada siempre lleva nota: es lo que resume la página.
+    if (opinionPublica && !nota) {
+      msg.textContent = 'Para publicar tu opinión, ponle también una nota.';
       msg.classList.add('form__msg--err');
       return;
     }
@@ -337,6 +388,9 @@ export const prerender = false;
       mensaje: partes.join('\n\n'),
       // La nota, aparte, para guardarla en su propia columna de Supabase.
       valoracion: nota || null,
+      // La opinión para publicar y el nombre con el que saldrá.
+      opinionPublica,
+      alias: String(datos.get('alias') ?? ''),
       ts: String(cargadoEn),
     };
 
@@ -353,7 +407,13 @@ export const prerender = false;
       if (!res.ok) throw new Error(resultado.error || 'error');
       form.reset();
       pintarEstrellas();
-      msg.textContent = '¡Gracias! Me ha llegado tu opinión.';
+      // El servidor dice qué ha pasado con la opinión pública.
+      const textos: Record<string, string> = {
+        publicada: '¡Gracias! Tu opinión ya está publicada: recarga la página para verla arriba.',
+        revision: '¡Gracias! Me ha llegado. Como tu opinión lleva un enlace o un correo, la reviso antes de publicarla.',
+        fallo: '¡Gracias! Me ha llegado, pero ahora mismo no se ha podido publicar en la página.',
+      };
+      msg.textContent = textos[resultado.publicacion] ?? '¡Gracias! Me ha llegado tu opinión.';
       msg.classList.add('form__msg--ok');
     } catch (e) {
       const detalle = e instanceof Error && e.message !== 'error' ? e.message : '';

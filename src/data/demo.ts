@@ -165,6 +165,30 @@ export const demo = {
     { id: 'gusto', label: '¿Qué te gustó?', placeholder: 'Lo que te sorprendió para bien…' },
     { id: 'falta', label: '¿Qué echaste en falta?', placeholder: 'Algo que intentaste y no supo hacer…' },
   ],
+
+  // Opiniones públicas: las que la gente escribe para que las lean otros.
+  // Se ven en el apartado «Opiniones», justo debajo del botón de descarga
+  // (src/components/sections/DemoOpiniones.astro). Mientras no haya ninguna
+  // publicada, ese apartado no aparece.
+  opiniones: {
+    etiqueta: 'Opiniones',
+    // Título para lectores de pantalla (no se ve).
+    titulo: 'Opiniones de quienes ya han probado Koda',
+    enlace: 'Deja la tuya ↓',
+    // Cuántas se enseñan como mucho, de la más nueva a la más antigua.
+    maximo: 20,
+
+    // Bloque del formulario para escribir la opinión pública (es opcional).
+    form: {
+      separador: 'Para publicar en esta página · Opcional',
+      label: 'Tu opinión, para quien dude si descargarla',
+      placeholder: 'En un par de frases: qué tal va, para qué te ha servido…',
+      aliasLabel: 'Nombre o alias que se verá',
+      aliasPlaceholder: 'Si lo dejas vacío, saldrá «Anónimo»',
+      aviso:
+        'Solo si rellenas este apartado: tu opinión, tu nota y ese nombre se publican en esta página, a la vista de cualquiera. Tu email y las tres respuestas de arriba no se publican nunca. Si luego quieres que la quite, escríbeme.',
+    },
+  },
 };
 
 export type Demo = typeof demo;
