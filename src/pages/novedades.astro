@@ -1,0 +1,524 @@
+---
+// src/pages/novedades.astro
+//
+// Página pública con lo nuevo de Koda: la próxima versión (Mi ordenador), lo
+// que ya está en la demo y lo que viene después. Todo el texto está en
+// src/data/novedades.ts. Va con los colores de la app de Koda (los de
+// app/ui/theme.py), no con los de la web del estudio.
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Footer from '../components/layout/Footer.astro';
+import KodaOrbe from '../components/sections/KodaOrbe.astro';
+import { site } from '../data/site';
+import { demo } from '../data/demo';
+import { novedades } from '../data/novedades';
+
+// Se genera en el servidor en cada visita, como /demo: allí Vercel daba 404
+// con la versión estática y así se evita el mismo problema.
+export const prerender = false;
+
+const { seo, pedirDemoUrl, portada, ordenador, ya, despues, probar } = novedades;
+const ej = ordenador.ejemplo;
+const textoProbar = probar.texto.replace('{sistema}', demo.sistema);
+const estadoMedicion = { bien: '● Bien', atencion: '● Atención', informa: '' };
+---
+
+<BaseLayout title={seo.title} description={seo.description}>
+  <div class="nv">
+    <header class="nv-nav">
+      <div class="nv-wrap nv-nav-in">
+        <a href="/" class="nv-logo"><span class="nv-marca">{site.mark}</span>{site.brand}</a>
+        <a href="/" class="nv-volver">← Web</a>
+      </div>
+    </header>
+
+    <main>
+      <!-- ───────── Portada ───────── -->
+      <section class="nv-hero" id="portada">
+        <div class="nv-wrap nv-hero-grid">
+          <div>
+            <p class="nv-estado proxima"><span class="nv-punto"></span>{portada.estado}</p>
+            <h1>{portada.titulo}</h1>
+            <p class="nv-entrada">{portada.entrada}</p>
+            <p class="nv-entrada nv-entrada-2">{portada.entrada2}</p>
+            <div class="nv-acciones">
+              <a class="nv-btn" href={pedirDemoUrl}>{portada.boton}</a>
+              <a class="nv-enlace" href="#ordenador">{portada.enlace}</a>
+            </div>
+            <p class="nv-nota">{portada.nota}</p>
+          </div>
+          <figure class="nv-orbe">
+            <KodaOrbe lado={440} etiqueta="El orbe de Koda: una constelación violeta que respira" />
+            <figcaption>{portada.orbePie}<span class="nv-solo-raton">{portada.orbePieRaton}</span></figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <!-- ───────── Mi ordenador (próxima versión) ───────── -->
+      <section class="nv-sec" id="ordenador">
+        <div class="nv-wrap">
+          <p class="nv-estado proxima"><span class="nv-punto"></span>{ordenador.estado}</p>
+          <h2>{ordenador.titulo}</h2>
+          <p class="nv-intro">{ordenador.intro}</p>
+
+          <div class="nv-ord-grid">
+            <!-- La ventana de Koda con la página Mi ordenador. Es un dibujo:
+                 los botones no son botones de verdad. -->
+            <figure class="kv" aria-label="La página Mi ordenador de Koda, con una revisión de ejemplo">
+              <div class="kv-barra">
+                <span class="kv-mini" aria-hidden="true"></span>Koda
+                <span class="kv-ctl" aria-hidden="true"><i></i><i></i><i></i></span>
+              </div>
+              <div class="kv-cuerpo">
+                <div class="kv-menu" aria-hidden="true">
+                  {ej.menu.map((m) => <span class={m === ej.activo ? 'on' : ''}><b>◆</b>{m}</span>)}
+                </div>
+                <div class="kv-pag">
+                  <p class="kv-ante">{ej.antetitulo}</p>
+                  <p class="kv-titulo">{ej.titulo}</p>
+                  <p class="kv-sub">{ej.subtitulo}</p>
+                  <span class="kv-boton principal">{ej.botonRevisar}</span>
+
+                  <p class="kv-sec">LO QUE CONVIENE HACER</p>
+                  {ej.recomendaciones.map((r, i) => (
+                    <div class="kv-tarjeta kv-rec">
+                      <span class="kv-num">{i + 1}</span>
+                      <div>
+                        <div class="kv-rec-cab">
+                          <b>{r.titulo}</b>
+                          {r.destacada && <span class="kv-recom">● Recomendado</span>}
+                        </div>
+                        <p>{r.texto}</p>
+                        <div class="kv-botones">
+                          {r.botones.map((b) => <span class={`kv-boton${b.principal ? ' principal' : ''}`}>{b.texto}</span>)}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+
+                  <p class="kv-sec">TODO LO QUE HE MIRADO</p>
+                  <div class="kv-tarjeta kv-medidas">
+                    {ej.mediciones.map((m) => (
+                      <div class="kv-med">
+                        <div class="kv-med-fila">
+                          <span class="kv-med-n">{m.nombre}</span>
+                          <span class="kv-med-v">{m.valor}</span>
+                          <span class={`kv-med-e ${m.estado}`}>{estadoMedicion[m.estado]}</span>
+                        </div>
+                        {m.porcentaje !== null && (
+                          <span class="kv-med-barra"><i class={m.estado} style={`width:${m.porcentaje}%`}></i></span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+
+                  <p class="kv-sec">LO QUE HE HECHO EN SU ORDENADOR</p>
+                  <div class="kv-tarjeta">
+                    {ej.historial.map((h) => (
+                      <div class="kv-hist"><span>{h.cuando}</span><p>{h.frase}</p></div>
+                    ))}
+                  </div>
+
+                  <div class="kv-tarjeta oscura">
+                    <p class="kv-sec kv-sec-dentro">LO QUE NUNCA MIRO</p>
+                    <p class="kv-nunca">{ej.nunca}</p>
+                    <p class="kv-nunca-2">{ej.nunca2}</p>
+                  </div>
+                </div>
+              </div>
+              <figcaption class="kv-pie">{ej.pie}</figcaption>
+            </figure>
+
+            <div>
+              <h3 class="nv-h3">Cómo funciona</h3>
+              <ol class="nv-pasos">
+                {ordenador.pasos.map((p) => (<li><b>{p.titulo}</b><span>{p.texto}</span></li>))}
+              </ol>
+
+              <div class="nv-listas">
+                <div>
+                  <h3 class="nv-h3">Lo que mira</h3>
+                  <ul class="nv-lista">{ordenador.mira.map((x) => <li>{x}</li>)}</ul>
+                </div>
+                <div>
+                  <h3 class="nv-h3">Lo que puede hacer por ti</h3>
+                  <ul class="nv-lista">{ordenador.hace.map((x) => <li>{x}</li>)}</ul>
+                </div>
+                <div>
+                  <h3 class="nv-h3">Lo que no hace nunca</h3>
+                  <ul class="nv-lista no">{ordenador.nunca.map((x) => <li>{x}</li>)}</ul>
+                </div>
+              </div>
+
+              <p class="nv-tambien"><b>{ordenador.tambien.negrita}</b> {ordenador.tambien.texto}</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ───────── Ya en la demo ───────── -->
+      <section class="nv-sec" id="ya">
+        <div class="nv-wrap">
+          <p class="nv-estado ya"><span class="nv-punto"></span>{ya.estado}</p>
+          <h2>{ya.titulo}</h2>
+          <p class="nv-intro">{ya.intro}</p>
+
+          <!-- Cámara -->
+          <article class="nv-func">
+            <div class="nv-func-texto">
+              <h3>{ya.camara.titulo}</h3>
+              <p>{ya.camara.texto}</p>
+              <ul class="nv-detalles">{ya.camara.detalles.map((d) => <li>{d}</li>)}</ul>
+            </div>
+            <div class="nv-ilus" aria-hidden="true">
+              <div class="il-ventana">
+                <div class="il-barra">{ya.camara.ventana}</div>
+                <div class="il-visor">
+                  <span class="il-esq a"></span><span class="il-esq b"></span>
+                  <span class="il-esq c"></span><span class="il-esq d"></span>
+                  <svg viewBox="0 0 120 90" class="il-taza">
+                    <path d="M38 30 h40 v30 a12 12 0 0 1 -12 12 h-16 a12 12 0 0 1 -12 -12 z" />
+                    <path d="M78 38 h6 a8 8 0 0 1 0 16 h-6" />
+                    <path d="M50 22 q3 -5 0 -10 M60 22 q3 -5 0 -10 M70 22 q3 -5 0 -10" class="vapor" />
+                  </svg>
+                </div>
+              </div>
+              <div class="il-burbuja">
+                <span class="il-quien"><i class="il-orbe-mini piloto"></i>Koda</span>
+                {ya.camara.koda}
+              </div>
+            </div>
+          </article>
+
+          <!-- Pantalla -->
+          <article class="nv-func">
+            <div class="nv-func-texto">
+              <h3>{ya.pantalla.titulo}</h3>
+              <p>{ya.pantalla.texto}</p>
+              <ul class="nv-detalles">{ya.pantalla.detalles.map((d) => <li>{d}</li>)}</ul>
+            </div>
+            <div class="nv-ilus" aria-hidden="true">
+              <div class="il-pantalla">
+                <div class="il-dialogo">
+                  <b>{ya.pantalla.aviso.programa}</b>
+                  <p>{ya.pantalla.aviso.texto}</p>
+                  <span>{ya.pantalla.aviso.boton}</span>
+                </div>
+              </div>
+              <div class="il-burbuja">
+                <span class="il-quien"><i class="il-orbe-mini"></i>Koda</span>
+                {ya.pantalla.koda}
+              </div>
+            </div>
+          </article>
+
+          <!-- Documentos -->
+          <article class="nv-func">
+            <div class="nv-func-texto">
+              <h3>{ya.documentos.titulo}</h3>
+              <p>{ya.documentos.texto}</p>
+              <ul class="nv-detalles">{ya.documentos.detalles.map((d) => <li>{d}</li>)}</ul>
+            </div>
+            <div class="nv-ilus" aria-hidden="true">
+              <div class="il-chat">
+                <div class="il-adjunto">
+                  <span class="il-clip">📎</span>
+                  <span><b>{ya.documentos.archivo.nombre}</b><small>{ya.documentos.archivo.peso}</small></span>
+                </div>
+                <div class="il-tu">{ya.documentos.pregunta}</div>
+              </div>
+              <div class="il-burbuja">
+                <span class="il-quien"><i class="il-orbe-mini"></i>Koda <em class="il-voz"><i></i><i></i><i></i><i></i></em></span>
+                {ya.documentos.koda}
+              </div>
+            </div>
+          </article>
+
+          <h3 class="nv-h3 nv-otras-t">{ya.otrasTitulo}</h3>
+          <dl class="nv-otras">
+            {ya.otras.map((o) => (<div><dt>{o.titulo}</dt><dd>{o.texto}</dd></div>))}
+          </dl>
+        </div>
+      </section>
+
+      <!-- ───────── Más adelante ───────── -->
+      <section class="nv-sec" id="despues">
+        <div class="nv-wrap">
+          <p class="nv-estado diseno"><span class="nv-punto"></span>{despues.estado}</p>
+          <h2>{despues.titulo}</h2>
+          <p class="nv-intro">{despues.intro}</p>
+
+          <div class="nv-desp-grid">
+            <article class="nv-desp estudio">
+              <h3>{despues.estudio.titulo}</h3>
+              <p>{despues.estudio.texto}</p>
+              <div class="il-ficha" aria-hidden="true">
+                <p class="il-ficha-ruta">{despues.estudio.ficha.ruta}</p>
+                <p class="il-ficha-t">{despues.estudio.ficha.tema}</p>
+                <div class="il-ficha-tabs">
+                  {despues.estudio.ficha.pestanas.map((p, i) => <span class={i === 0 ? 'on' : ''}>{p}</span>)}
+                </div>
+                <p class="il-ficha-txt">{despues.estudio.ficha.idea}</p>
+                <p class="il-ficha-ej">{despues.estudio.ficha.ejemplo}</p>
+              </div>
+            </article>
+
+            <article class="nv-desp">
+              <h3>{despues.trabajo.titulo}</h3>
+              <p>{despues.trabajo.texto}</p>
+            </article>
+
+            <article class="nv-desp">
+              <h3>{despues.investiga.titulo}</h3>
+              <p>{despues.investiga.texto}</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- ───────── Probar ───────── -->
+      <section class="nv-sec nv-probar" id="probar">
+        <div class="nv-wrap nv-probar-in">
+          <h2>{probar.titulo}</h2>
+          <p class="nv-intro">{textoProbar}</p>
+          <a class="nv-btn" href={pedirDemoUrl}>{probar.boton}</a>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <Footer />
+</BaseLayout>
+
+<style>
+  /* Colores de la app de Koda (app/ui/theme.py). */
+  .nv {
+    --fondo: #0D0719; --sup: #0A0514; --sup1: #17102A; --sup2: #1E1636;
+    --borde: #2A1F4A; --borde2: #1B1433;
+    --txt: #E9E4F5; --txt2: #9A8FB8; --txt3: #6B6088;
+    --vio: #A78BFA; --vio2: #C7B4FF; --vio3: #6D5BA8; --sobre: #12081F;
+    --ok: #5FCF9B; --aviso: #E2A44B; --rojo: #E0504A;
+    background: var(--fondo);
+    color: var(--txt);
+  }
+  .nv-wrap { max-width: 1180px; margin: 0 auto; padding: 0 24px; }
+  .nv h1, .nv h2, .nv h3 { font-family: 'Space Grotesk', sans-serif; color: var(--txt); }
+
+  /* Cabecera */
+  .nv-nav { border-bottom: 1px solid var(--borde2); }
+  .nv-nav-in { display: flex; justify-content: space-between; align-items: center; height: 68px; }
+  .nv-logo { display: flex; align-items: center; gap: 0.6rem; font-family: 'Space Grotesk', sans-serif; font-weight: 700; letter-spacing: -0.02em; }
+  .nv-marca {
+    width: 32px; height: 32px; border-radius: 9px; display: grid; place-items: center;
+    background: var(--sup2); color: var(--vio2); border: 1px solid var(--borde);
+  }
+  .nv-volver { color: var(--txt2); font-size: 0.95rem; padding: 0.5rem 1rem; border: 1px solid var(--borde); border-radius: 999px; }
+  .nv-volver:hover { color: var(--txt); border-color: var(--vio3); }
+  .nv-logo:focus-visible, .nv-volver:focus-visible { outline: 2px solid var(--vio2); outline-offset: 3px; }
+
+  /* Piezas comunes */
+  .nv-estado { display: inline-flex; align-items: center; gap: 10px; font-size: 0.95rem; margin-bottom: 18px; }
+  .nv-estado.proxima { color: var(--vio2); }
+  .nv-estado.ya { color: var(--ok); }
+  .nv-estado.diseno { color: var(--txt2); }
+  .nv-punto { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+  .nv-estado.proxima .nv-punto { animation: nv-late 2.4s ease-out infinite; }
+  @keyframes nv-late {
+    0% { box-shadow: 0 0 0 0 rgba(199, 180, 255, 0.55); }
+    100% { box-shadow: 0 0 0 12px rgba(199, 180, 255, 0); }
+  }
+  .nv-btn {
+    display: inline-block; background: var(--vio); color: var(--sobre);
+    font-family: 'Space Grotesk', sans-serif; font-weight: 600;
+    padding: 0.95rem 1.6rem; border-radius: 999px; transition: background 0.2s;
+  }
+  .nv-btn:hover { background: var(--vio2); }
+  .nv-btn:focus-visible, .nv-enlace:focus-visible { outline: 2px solid var(--vio2); outline-offset: 3px; }
+  .nv-enlace { color: var(--vio2); font-weight: 500; border-bottom: 1px solid var(--vio3); padding-bottom: 2px; }
+  .nv-enlace:hover { color: var(--txt); border-color: var(--vio2); }
+  .nv-nota { color: var(--txt3); font-size: 0.88rem; margin-top: 16px; }
+  .nv-sec { padding: 112px 0; border-top: 1px solid var(--borde2); }
+  .nv-sec h2 { font-size: clamp(1.9rem, 3.6vw, 2.9rem); font-weight: 600; letter-spacing: -0.025em; line-height: 1.08; max-width: 22ch; }
+  .nv-intro { color: var(--txt2); font-size: 1.12rem; line-height: 1.6; max-width: 40rem; margin-top: 16px; }
+  .nv-h3 { font-size: 1.05rem; font-weight: 600; margin-bottom: 14px; }
+
+  /* Portada */
+  .nv-hero { padding: 72px 0 96px; overflow: hidden; }
+  .nv-hero-grid { display: grid; grid-template-columns: 1fr 460px; gap: 48px; align-items: center; }
+  .nv-hero h1 { font-size: clamp(2.6rem, 5.4vw, 4.4rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.02; max-width: 13ch; }
+  .nv-entrada { color: var(--txt2); font-size: 1.16rem; line-height: 1.6; max-width: 34rem; margin-top: 22px; }
+  .nv-entrada-2 { margin-top: 12px; color: var(--txt); }
+  .nv-acciones { display: flex; align-items: center; gap: 28px; flex-wrap: wrap; margin-top: 32px; }
+  .nv-orbe { margin: 0; display: flex; flex-direction: column; align-items: center; }
+  .nv-orbe figcaption { color: var(--txt3); font-size: 0.82rem; margin-top: 4px; text-align: center; }
+
+  /* Mi ordenador */
+  .nv-ord-grid { display: grid; grid-template-columns: minmax(0, 660px) minmax(0, 1fr); gap: 64px; margin-top: 56px; align-items: start; }
+  .nv-pasos { list-style: none; counter-reset: paso; display: grid; gap: 18px; margin-bottom: 40px; }
+  .nv-pasos li { counter-increment: paso; display: grid; grid-template-columns: 34px 1fr; column-gap: 14px; }
+  .nv-pasos li::before {
+    content: counter(paso); grid-row: span 2; width: 30px; height: 30px; border-radius: 50%;
+    background: var(--sup2); color: var(--vio2); font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 0.9rem;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .nv-pasos b { font-family: 'Space Grotesk', sans-serif; font-weight: 600; }
+  .nv-pasos span { color: var(--txt2); line-height: 1.55; font-size: 0.97rem; }
+  .nv-listas { display: grid; gap: 28px; padding-top: 32px; border-top: 1px solid var(--borde2); }
+  .nv-lista { list-style: none; display: grid; gap: 8px; }
+  .nv-lista li { color: var(--txt2); padding-left: 20px; position: relative; line-height: 1.5; font-size: 0.97rem; }
+  .nv-lista li::before { content: ''; position: absolute; left: 2px; top: 0.62em; width: 8px; height: 2px; background: var(--vio); }
+  .nv-lista.no li::before { content: '×'; width: auto; height: auto; background: none; color: var(--rojo); top: 0; font-weight: 600; }
+  .nv-tambien { margin-top: 36px; color: var(--txt2); line-height: 1.6; font-size: 0.97rem; padding: 16px 18px; border-left: 2px solid var(--vio3); background: var(--sup); }
+  .nv-tambien b { color: var(--txt); }
+
+  /* La ventana de Koda */
+  .kv { margin: 0; background: var(--sup); border: 1px solid var(--borde); border-radius: 14px; overflow: hidden; box-shadow: 0 50px 100px -50px rgba(167, 139, 250, 0.45); }
+  .kv-barra { display: flex; align-items: center; gap: 9px; padding: 10px 14px; font-size: 0.82rem; color: var(--txt2); border-bottom: 1px solid var(--borde); }
+  .kv-mini { width: 14px; height: 14px; border-radius: 50%; background: radial-gradient(circle, #fff 0 12%, var(--vio) 32%, rgba(167, 139, 250, 0) 72%); box-shadow: 0 0 0 1px rgba(167, 139, 250, 0.35); }
+  .kv-ctl { margin-left: auto; display: flex; gap: 14px; }
+  .kv-ctl i { width: 10px; height: 10px; border: 1px solid var(--txt3); border-radius: 2px; }
+  .kv-ctl i:first-child { border-width: 0 0 1px 0; border-radius: 0; height: 6px; }
+  .kv-cuerpo { display: grid; grid-template-columns: 150px 1fr; }
+  .kv-menu { display: flex; flex-direction: column; gap: 3px; padding: 16px 10px; border-right: 1px solid var(--borde); font-size: 0.8rem; color: var(--txt2); }
+  .kv-menu span { padding: 8px 10px; border-radius: 8px; display: flex; gap: 8px; align-items: center; white-space: nowrap; }
+  .kv-menu b { font-size: 0.55rem; color: var(--txt3); }
+  .kv-menu .on { background: var(--sup2); color: var(--txt); }
+  .kv-menu .on b { color: var(--vio); }
+  .kv-pag { background: var(--fondo); padding: 20px 22px 24px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+  .kv-ante { color: var(--vio); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.14em; }
+  .kv-titulo { font-size: 1.5rem; font-weight: 700; line-height: 1.2; }
+  .kv-sub { color: var(--txt2); font-size: 0.84rem; }
+  .kv-boton { display: inline-flex; align-items: center; height: 30px; padding: 0 13px; border-radius: 7px; font-size: 0.76rem; border: 1px solid var(--vio3); color: var(--vio2); white-space: nowrap; }
+  .kv-boton.principal { background: var(--vio); color: var(--sobre); border-color: var(--vio); font-weight: 700; }
+  .kv-pag > .kv-boton { align-self: flex-start; margin-top: 2px; }
+  .kv-sec { color: var(--txt2); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.12em; margin-top: 12px; }
+  .kv-sec-dentro { margin-top: 0; }
+  .kv-tarjeta { background: var(--sup1); border: 1px solid var(--borde); border-radius: 11px; padding: 12px 15px; display: flex; flex-direction: column; gap: 6px; }
+  .kv-tarjeta.oscura { background: var(--sup); margin-top: 8px; }
+  .kv-rec { flex-direction: row; gap: 12px; align-items: flex-start; }
+  .kv-num { flex: none; width: 27px; height: 27px; border-radius: 50%; background: var(--sup2); color: var(--vio2); font-size: 0.78rem; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+  .kv-rec-cab { display: flex; gap: 10px; justify-content: space-between; align-items: baseline; }
+  .kv-rec-cab b { font-size: 0.92rem; }
+  .kv-recom { color: var(--aviso); font-size: 0.72rem; font-weight: 700; white-space: nowrap; }
+  .kv-rec p { color: var(--txt2); font-size: 0.8rem; line-height: 1.45; margin-top: 3px; }
+  .kv-botones { display: flex; gap: 7px; flex-wrap: wrap; margin-top: 9px; }
+  .kv-medidas { gap: 0; padding: 6px 15px; }
+  .kv-med { padding: 8px 0; border-top: 1px solid var(--borde2); }
+  .kv-med:first-child { border-top: 0; }
+  .kv-med-fila { display: grid; grid-template-columns: auto 1fr 74px; gap: 12px; align-items: baseline; }
+  .kv-med-n { font-size: 0.85rem; white-space: nowrap; }
+  .kv-med-v { color: var(--txt2); font-size: 0.79rem; text-align: right; }
+  .kv-med-e { font-size: 0.72rem; font-weight: 700; text-align: right; white-space: nowrap; }
+  .kv-med-e.bien { color: var(--ok); }
+  .kv-med-e.atencion { color: var(--aviso); }
+  .kv-med-barra { display: block; height: 5px; border-radius: 3px; background: var(--borde); margin-top: 7px; overflow: hidden; }
+  .kv-med-barra i { display: block; height: 100%; border-radius: 3px; background: var(--vio); }
+  .kv-med-barra i.atencion { background: var(--aviso); }
+  .kv-hist { display: grid; grid-template-columns: 82px 1fr; gap: 12px; padding: 6px 0; border-top: 1px solid var(--borde2); font-size: 0.8rem; }
+  .kv-hist:first-child { border-top: 0; }
+  .kv-hist span { color: var(--txt2); font-size: 0.74rem; }
+  .kv-nunca { font-size: 0.8rem; line-height: 1.5; }
+  .kv-nunca-2 { color: var(--txt2); font-size: 0.74rem; }
+  .kv-pie { color: var(--txt3); font-size: 0.78rem; padding: 10px 14px; border-top: 1px solid var(--borde); }
+
+  /* Ya en la demo */
+  .nv-func { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 520px); gap: 72px; align-items: center; padding: 64px 0; border-top: 1px solid var(--borde2); }
+  .nv-func:first-of-type { margin-top: 48px; }
+  .nv-func h3 { font-size: clamp(1.5rem, 2.4vw, 1.9rem); font-weight: 600; letter-spacing: -0.02em; margin-bottom: 14px; }
+  .nv-func-texto > p { color: var(--txt2); line-height: 1.65; font-size: 1.04rem; max-width: 34rem; }
+  .nv-detalles { list-style: none; margin-top: 20px; display: grid; gap: 8px; }
+  .nv-detalles li { font-size: 0.95rem; padding-left: 20px; position: relative; line-height: 1.5; }
+  .nv-detalles li::before { content: ''; position: absolute; left: 2px; top: 0.62em; width: 8px; height: 2px; background: var(--ok); }
+  .nv-ilus { display: grid; gap: 12px; width: 100%; max-width: 460px; justify-self: end; }
+  .il-burbuja { background: var(--sup1); border: 1px solid var(--borde); border-radius: 14px; padding: 12px 16px; font-size: 0.95rem; line-height: 1.5; margin-left: 48px; }
+  .il-quien { display: flex; align-items: center; gap: 8px; color: var(--vio2); font-size: 0.78rem; margin-bottom: 4px; }
+  .il-orbe-mini { width: 14px; height: 14px; border-radius: 50%; position: relative; background: radial-gradient(circle, #fff 0 12%, var(--vio) 32%, rgba(167, 139, 250, 0) 72%); }
+  .il-orbe-mini.piloto::after { content: ''; position: absolute; right: -3px; top: -2px; width: 6px; height: 6px; border-radius: 50%; background: var(--rojo); box-shadow: 0 0 6px var(--rojo); }
+  .il-ventana { background: var(--sup); border: 1px solid var(--borde); border-radius: 12px; overflow: hidden; }
+  .il-barra { font-size: 0.76rem; color: var(--txt2); padding: 8px 12px; border-bottom: 1px solid var(--borde); }
+  .il-visor { position: relative; aspect-ratio: 4 / 3; background: radial-gradient(ellipse at 50% 60%, #2a2140, #120c20 70%); display: flex; align-items: center; justify-content: center; }
+  .il-taza { width: 52%; fill: none; stroke: #8fb0e8; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+  .il-taza .vapor { stroke: var(--txt3); stroke-width: 1.6; }
+  .il-esq { position: absolute; width: 22px; height: 22px; border: 2px solid rgba(233, 228, 245, 0.55); }
+  .il-esq.a { top: 14px; left: 14px; border-width: 2px 0 0 2px; }
+  .il-esq.b { top: 14px; right: 14px; border-width: 2px 2px 0 0; }
+  .il-esq.c { bottom: 14px; left: 14px; border-width: 0 0 2px 2px; }
+  .il-esq.d { bottom: 14px; right: 14px; border-width: 0 2px 2px 0; }
+  .il-pantalla { aspect-ratio: 16 / 10; min-width: 0; min-height: 0; border-radius: 10px; border: 1px solid var(--borde); background: linear-gradient(160deg, #1d2a4a, #11182c); display: flex; align-items: center; justify-content: center; padding: 20px; }
+  .il-dialogo { background: #f3f3f5; color: #1c1c1e; border-radius: 8px; padding: 14px 16px 12px; width: 78%; font-size: 0.78rem; box-shadow: 0 16px 40px -12px rgba(0, 0, 0, 0.6); display: flex; flex-direction: column; gap: 8px; }
+  .il-dialogo b { font-size: 0.74rem; color: #444; font-weight: 600; }
+  .il-dialogo p { line-height: 1.4; }
+  .il-dialogo span { align-self: flex-end; background: #2a5bd7; color: #fff; padding: 4px 14px; border-radius: 5px; font-size: 0.72rem; }
+  .il-chat { display: grid; gap: 10px; }
+  .il-adjunto { display: flex; gap: 12px; align-items: center; background: var(--sup); border: 1px solid var(--borde); border-radius: 12px; padding: 12px 14px; justify-self: end; }
+  .il-clip { font-size: 1.2rem; }
+  .il-adjunto span { display: flex; flex-direction: column; font-size: 0.88rem; }
+  .il-adjunto small { color: var(--txt3); font-size: 0.74rem; }
+  .il-tu { justify-self: end; background: var(--sup2); border-radius: 14px; padding: 10px 14px; font-size: 0.95rem; }
+  .il-voz { display: inline-flex; gap: 2px; align-items: center; margin-left: 4px; height: 12px; }
+  .il-voz i { width: 2px; background: var(--vio2); border-radius: 1px; animation: nv-onda 1s ease-in-out infinite; }
+  .il-voz i:nth-child(1) { height: 5px; }
+  .il-voz i:nth-child(2) { height: 11px; animation-delay: 0.15s; }
+  .il-voz i:nth-child(3) { height: 7px; animation-delay: 0.3s; }
+  .il-voz i:nth-child(4) { height: 10px; animation-delay: 0.45s; }
+  @keyframes nv-onda { 50% { transform: scaleY(0.4); } }
+  .nv-otras-t { margin-top: 56px; }
+  .nv-otras { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0 48px; }
+  .nv-otras div { padding: 20px 0; border-top: 1px solid var(--borde2); }
+  .nv-otras dt { font-family: 'Space Grotesk', sans-serif; font-weight: 600; margin-bottom: 6px; }
+  .nv-otras dd { color: var(--txt2); line-height: 1.55; font-size: 0.97rem; }
+
+  /* Más adelante */
+  .nv-desp-grid { display: grid; grid-template-columns: 1.35fr 1fr; grid-template-rows: auto auto; gap: 20px; margin-top: 48px; }
+  .nv-desp { border: 1px dashed var(--borde); border-radius: 16px; padding: 28px; }
+  .nv-desp.estudio { grid-row: span 2; }
+  .nv-desp h3 { font-size: 1.4rem; font-weight: 600; margin-bottom: 10px; }
+  .nv-desp > p { color: var(--txt2); line-height: 1.6; }
+  .il-ficha { margin-top: 24px; background: var(--sup1); border: 1px solid var(--borde); border-radius: 12px; padding: 18px 20px; }
+  .il-ficha-ruta { color: var(--txt3); font-size: 0.78rem; }
+  .il-ficha-t { font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 1.1rem; margin-top: 4px; }
+  .il-ficha-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin: 14px 0 12px; }
+  .il-ficha-tabs span { font-size: 0.74rem; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--borde); color: var(--txt2); }
+  .il-ficha-tabs .on { background: var(--sup2); color: var(--vio2); border-color: var(--vio3); }
+  .il-ficha-txt { line-height: 1.55; font-size: 0.93rem; }
+  .il-ficha-ej { margin-top: 10px; font-family: 'Space Grotesk', sans-serif; color: var(--vio2); font-size: 0.95rem; }
+
+  /* Probar */
+  .nv-probar-in { text-align: center; display: flex; flex-direction: column; align-items: center; }
+  .nv-probar h2 { max-width: none; }
+  .nv-probar .nv-intro { margin: 16px auto 32px; }
+
+  /* Tabletas y portátiles pequeños */
+  @media (max-width: 1060px) {
+    .nv-hero-grid { grid-template-columns: 1fr; }
+    .nv-orbe { order: -1; }
+    .nv-ord-grid { grid-template-columns: 1fr; }
+    .nv-func { grid-template-columns: minmax(0, 1fr); gap: 32px; }
+  }
+  /* Móvil */
+  @media (max-width: 760px) {
+    .nv-sec { padding: 80px 0; }
+    .nv-wrap { padding: 0 16px; }
+    .nv-hero { padding: 12px 0 72px; }
+    .nv-hero-grid { gap: 20px; }
+    .nv-orbe :global(canvas) { width: 240px !important; }
+    .kv-cuerpo { grid-template-columns: 1fr; }
+    .kv-menu { display: none; }
+    .kv-pag { padding: 18px 14px 20px; }
+    .kv-rec-cab { flex-direction: column; gap: 2px; }
+    .kv-med-fila { grid-template-columns: 1fr auto; }
+    .kv-med-v { grid-column: 1 / -1; grid-row: 2; text-align: left; }
+    .nv-otras { grid-template-columns: 1fr; }
+    .nv-desp-grid { grid-template-columns: 1fr; }
+    .nv-desp.estudio { grid-row: auto; }
+    .nv-desp { padding: 22px 18px; }
+    .nv-ilus { justify-self: stretch; max-width: none; }
+    .il-burbuja { margin-left: 24px; }
+  }
+  /* En pantallas táctiles no hay ratón que acercar. */
+  @media (hover: none) {
+    .nv-solo-raton { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .nv-estado .nv-punto, .il-voz i { animation: none; }
+  }
+</style>
